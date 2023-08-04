@@ -1,0 +1,7 @@
+# go
+/bin
+
+# yarn
+node_modules
+yarn-error.log
+server/static
