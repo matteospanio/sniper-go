@@ -1,9 +1,8 @@
-{% extends 'base.html.jinja' %}
+{{ template "base" . }}
 
-{% block title %}MPAI{% endblock title %}
+{{ define "title" }}MPAI{{ end }}
 
-{% block body %}
-
+{{define "body"}}
 <div class="p-5 container-fluid">
     <h1>Main Page</h1>
     <p>testo</p>
@@ -12,4 +11,4 @@
 
 </div>
 
-{% endblock body %}
+{{end}}

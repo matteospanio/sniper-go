@@ -9,8 +9,8 @@ help: ## Show this help
 	@echo "  build: Build the binary file"
 	@echo "  setup: Setup the project"
 
-build: src/main.go ## Build the binary file
-	$(GO) build -o bin/$(BINARY_NAME) server/main.go
+build: ## Build the binary file
+	$(GO) build -o bin/$(BINARY_NAME) src/main.go
 
 setup: ## Setup the project
 	$(GO) get .

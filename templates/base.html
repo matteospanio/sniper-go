@@ -1,0 +1,23 @@
+{{define "base"}}
+<!DOCTYPE html>
+<html data-controller="theme" data-theme-theme-value="light" lang="en">
+
+    <head>
+        <title>{{ block "title" . }}Defult title{{ end }}</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        {{ block "javascript" . }}
+            <script src="/assets/app.js"></script>
+        {{ end }}
+    </head>
+
+    <body>
+
+        <main class="d-flex">
+            {{ block "body" . }}Content{{ end }}
+        </main>
+
+    </body>
+
+</html>
+{{end}}

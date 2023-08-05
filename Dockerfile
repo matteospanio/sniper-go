@@ -10,4 +10,6 @@ RUN go mod download
 
 RUN make build
 
+EXPOSE 8080
+
 ENTRYPOINT ["./bin/sniper-go"]

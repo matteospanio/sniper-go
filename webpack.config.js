@@ -4,7 +4,7 @@ const path = require("path");
 const { WebpackManifestPlugin } = require('webpack-manifest-plugin');
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
-const rootAssetPath = './client'
+const rootAssetPath = './assets'
 
 const isProduction = process.env.NODE_ENV == "production";
 
@@ -17,10 +17,10 @@ const config = {
     app: rootAssetPath + '/app.js'
   },
   output: {
-    path: path.resolve(__dirname, "./server/static/"),
+    path: path.resolve(__dirname, "./static/"),
     //publicPath: 'http://localhost:5000/static',
-    filename: '[name].[chunkhash].js',
-    chunkFilename: '[id].[chunkhash].js',
+    filename: '[name].js',
+    chunkFilename: '[id].js',
     clean: true,
   },
   devServer: {
