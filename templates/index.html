@@ -1,13 +1,18 @@
 {{ template "base" . }}
 
-{{ define "title" }}MPAI{{ end }}
+{{ define "title" }}{{ end }}
 
 {{define "body"}}
-<div class="p-5 container-fluid">
+<div class="p-5 container-md">
     <h1>Main Page</h1>
     <p>testo</p>
 
-    <button data-controller='stimulus' data-action='theme#onClick' data-action='stimulus#onClick' class="btn btn-info">Notifica</button>
+    <div data-controller='socket'>
+        <p data-socket-target='output'></p>
+        <label class="form-label" for="input">Inserisci un testo</label>
+        <input class="form-control" type="text" id="input" data-socket-target='input' class="form-control" placeholder="Inserisci un testo">
+        <button data-action='socket#sendInput' id="btn" class="btn btn-primary">Invia</button>
+    </div>
 
 </div>
 

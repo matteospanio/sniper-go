@@ -8,6 +8,12 @@ COPY . .
 
 RUN go mod download
 
+RUN apt update && apt install -y nodejs npm
+
+RUN npm install
+
+RUN npm run build
+
 RUN make build
 
 EXPOSE 8080

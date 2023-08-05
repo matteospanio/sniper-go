@@ -13,6 +13,8 @@
 
     <body>
 
+        {{ block "header" . }}{{end}}
+
         <main class="d-flex">
             {{ block "body" . }}Content{{ end }}
         </main>

@@ -1,19 +1,22 @@
 import { Controller } from '@hotwired/stimulus'
 
-export default class extends Controller {
-    static values={
+export default class extends Controller<HTMLElement> {
+    static values = {
         theme: String
     }
 
-    // connect() {
-    //     this.element.dataset.bsTheme=this.themeValue
-    // }
+    declare themeValue: string
+    declare readonly hasThemeValue: boolean
 
-    themeValueChanged() {
+    connect() {
         this.element.dataset.bsTheme=this.themeValue
     }
 
-    onClick() {
+    themeValueChanged() {
+        this.element.dataset.bsTheme = this.themeValue
+    }
+
+    switchTheme() {
         if (this.themeValue === 'light') {
             this.themeValue = 'dark'
         } else {

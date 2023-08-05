@@ -14,10 +14,10 @@ const stylesHandler = isProduction
 
 const config = {
   entry: {
-    app: rootAssetPath + '/app.js'
+    app: rootAssetPath + '/app.ts'
   },
   output: {
-    path: path.resolve(__dirname, "./static/"),
+    path: path.resolve(__dirname, "./dist/"),
     //publicPath: 'http://localhost:5000/static',
     filename: '[name].js',
     chunkFilename: '[id].js',
@@ -32,6 +32,11 @@ const config = {
   ],
   module: {
     rules: [
+      {
+        test: /\.tsx?$/,
+        use: 'ts-loader',
+        exclude: /node_modules/,
+      },
       {
         test: /\.(js|jsx)$/i,
         loader: "babel-loader",
@@ -49,15 +54,18 @@ const config = {
       {
         test: /.(ttf|otf|eot|svg|woff(2)?)(\?[a-z0-9]+)?$/,
         use: [{
-            loader: 'file-loader',
-            options: {
+          loader: 'file-loader',
+          options: {
             name: '[name].[ext]',
             outputPath: 'fonts/',  
             publicPath: 'static/fonts' 
-            }
+          }
         }]
     },
     ],
+  },
+  resolve: {
+    extensions: ['.tsx', '.ts', '.js'],
   },
 };
 

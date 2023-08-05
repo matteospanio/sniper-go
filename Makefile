@@ -10,7 +10,6 @@ help: ## Show this help
 	@echo "  setup: Setup the project"
 
 build: ## Build the binary file
-	yarn build
 	$(GO) build -o bin/$(BINARY_NAME) src/main.go
 
 setup: ## Setup the project
