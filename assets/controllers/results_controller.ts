@@ -12,13 +12,12 @@ export default class extends Controller {
 
     load() {
 
-        let element = document.createElement('ul')
-
+        const element = document.createElement('ul')
+        element.classList.add('list-group')
         fetch('/results')
             .then(response => response.json())
             .then( (data: Response) => {
-                const results = data.results
-                results.forEach(result => {
+                data.results.forEach(result => {
                     let li = document.createElement('li')
                     li.innerHTML = `${result.host} - ${result.score}`
                     element.appendChild(li)

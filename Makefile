@@ -10,7 +10,7 @@ help: ## Show this help
 	@echo "  setup: Setup the project"
 
 build: ## Build the binary file
-	$(GO) build -o bin/$(BINARY_NAME) src/main.go
+	cd ./src && $(GO) build -o ../bin/$(BINARY_NAME) .
 
 setup: ## Setup the project
 	$(GO) get .
