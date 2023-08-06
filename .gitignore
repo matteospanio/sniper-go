@@ -8,4 +8,7 @@ server/static
 static
 dist
 
+# editor
+.idea
+
 data

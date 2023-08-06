@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"html/template"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -26,13 +25,13 @@ type ReportSummary struct {
 	Score    int    `json:"score"`
 }
 
-var wsupgrader = websocket.Upgrader{
+var wsUpgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
 }
 
-func wshandler(w http.ResponseWriter, r *http.Request) {
-	conn, err := wsupgrader.Upgrade(w, r, nil)
+func wsHandler(w http.ResponseWriter, r *http.Request) {
+	conn, err := wsUpgrader.Upgrade(w, r, nil)
 	if err != nil {
 		fmt.Printf("Failed to set websocket upgrade: %+v", err)
 		return
@@ -48,6 +47,12 @@ func wshandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+
+	PORT, exists := os.LookupEnv("PORT")
+	if !exists {
+		PORT = "8080"
+	}
+
 	router := gin.Default()
 
 	templates, err := ParseTemplateDir("templates")
@@ -64,28 +69,40 @@ func main() {
 		})
 	})
 	router.GET("/ws", func(c *gin.Context) {
-		wshandler(c.Writer, c.Request)
+		wsHandler(c.Writer, c.Request)
 	})
 	router.GET("/results", func(c *gin.Context) {
-		results := []ReportSummary{}
+		var results []ReportSummary
 
 		fileList, err := os.ReadDir("./data")
 		if err != nil {
-			c.JSON(500, gin.H{"error": err.Error()})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		}
 
 		for _, file := range fileList {
 			log.Println(file.Name())
 			report, err := readSummaryFile(file.Name())
 			if err != nil {
-				c.JSON(500, gin.H{"error": err.Error()})
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			}
 			results = append(results, report)
 		}
-		c.JSON(200, gin.H{"results": results})
+		c.JSON(http.StatusOK, gin.H{"results": results})
+	})
+	router.GET("/results/:hostName", func(c *gin.Context) {
+		host := c.Param("hostName")
+		report, err := readSummaryFile(host)
+		if err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		}
+		c.JSON(http.StatusOK, gin.H{"data": report})
 	})
 
-	router.Run("0.0.0.0:8080")
+	err = router.Run(fmt.Sprintf("0.0.0.0:%s", PORT))
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
 
 }
 
@@ -126,28 +143,24 @@ func ParseTemplateDir(dir string) (*template.Template, error) {
 }
 
 func readSummaryFile(host string) (ReportSummary, error) {
-	// Read file
-	os.ReadDir(fmt.Sprintf("/data/%s", host))
-	report := ReportSummary{}
-
 	// Parse file
-	content, err := ioutil.ReadFile(
+	content, err := os.ReadFile(
 		fmt.Sprintf(
 			"./data/%s/vulnerabilities/vulnerability-report-%s.txt",
 			host,
 			host,
 		))
 	if err != nil {
-		return report, err
+		return ReportSummary{}, err
 	}
 
-	content_str := string(content)
+	contentStr := string(content)
 
 	re := regexp.MustCompile(`Critical: (\d+)\nHigh: (\d+)\nMedium: (\d+)\nLow: (\d+)\nInfo: (\d+)\nScore: (\d+)`)
-	matches := re.FindStringSubmatch(content_str)
+	matches := re.FindStringSubmatch(contentStr)
 
 	if len(matches) < 7 || matches == nil {
-		return report, fmt.Errorf("regxep: no matches for %s", host)
+		return ReportSummary{}, fmt.Errorf("regxep: no matches for %s", host)
 	}
 
 	crt, _ := strconv.Atoi(matches[1])

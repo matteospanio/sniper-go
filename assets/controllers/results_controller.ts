@@ -1,0 +1,30 @@
+import { Controller } from '@hotwired/stimulus'
+import { ResultSummary } from '../ResultSummary'
+
+interface Response {
+    results: ResultSummary[]
+}
+
+export default class extends Controller {
+    connect() {
+        this.load()
+    }
+
+    load() {
+
+        let element = document.createElement('ul')
+
+        fetch('/results')
+            .then(response => response.json())
+            .then( (data: Response) => {
+                const results = data.results
+                results.forEach(result => {
+                    let li = document.createElement('li')
+                    li.innerHTML = `${result.host} - ${result.score}`
+                    element.appendChild(li)
+                })
+                this.element.appendChild(element)
+            })
+            .catch(error => console.error(error))
+    }
+}
