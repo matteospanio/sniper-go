@@ -1,21 +1,15 @@
 {{ template "base" . }}
-
-{{ define "title" }}{{ end }}
-
 {{define "body"}}
-<div class="p-5 container-md">
-    <h1>Main Page</h1>
-    <p>testo</p>
-
-    <div data-controller='socket'>
-        <p data-socket-target='output'></p>
-        <label class="form-label" for="input">Inserisci un testo</label>
-        <input class="form-control" type="text" id="input" data-socket-target='input' class="form-control" placeholder="Inserisci un testo">
-        <button data-action='socket#sendInput' id="btn" class="btn btn-primary">Invia</button>
+<div class="p-5 container-md mb-3">
+    <div class="row">
+        <label class="form-label" for="input">Scan Target</label>
+        <div class="input-group">
+            <input type="text" class="form-control"  id="input" data-socket-target='input' placeholder="type an IP address or host name" aria-label="target host" aria-describedby="btn">
+            <button data-action='socket#sendInput' id="btn" class="btn btn-primary" type="button">Snipe!</button>
+        </div>
     </div>
-
-    <div class="p-3" data-controller="results"></div>
-
+    <div class="row mt-5">
+        <div data-controller="results"></div>
+    </div>
 </div>
-
 {{end}}
