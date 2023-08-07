@@ -8,10 +8,14 @@
 package main
 
 import (
+	"bufio"
 	"encoding/json"
 	"fmt"
+	"html"
 	"net/http"
 	"os"
+	"os/exec"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
@@ -23,27 +27,56 @@ var wsupgrader = websocket.Upgrader{
 	CheckOrigin:     func(r *http.Request) bool { return true },
 }
 
-func wshandler(w http.ResponseWriter, r *http.Request) {
-	conn, err := wsupgrader.Upgrade(w, r, nil)
+func handleWebSocket(c *gin.Context) {
+	conn, err := wsupgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
-		fmt.Printf("Failed to set websocket upgrade: %+v", err)
+		fmt.Println("Failed to set websocket upgrade: ", err)
 		return
 	}
+	defer conn.Close()
 
 	for {
-		t, msg, err := conn.ReadMessage()
+		_, msg, err := conn.ReadMessage()
 		if err != nil {
-			break
+			fmt.Println(err)
+			return
 		}
-		conn.WriteMessage(t, msg)
+
+		fmt.Printf("Processing: %s\n", msg)
+		command := strings.Split(string(msg), " ")
+		cmd := exec.Command(command[0], command[1:]...)
+
+		stdout, err := cmd.StdoutPipe()
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+
+		cmd.Start()
+
+		scanner := bufio.NewScanner(stdout)
+
+		go func() {
+			f, err := os.Create(fmt.Sprintf("./history/%s.txt", strings.Join(command, "_")))
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+			defer f.Close()
+
+			for scanner.Scan() {
+				line := scanner.Text()
+				f.WriteString(line + "\n")
+				conn.WriteMessage(websocket.TextMessage, []byte(html.EscapeString(line)))
+			}
+		}()
+
+		cmd.Wait()
 	}
 }
 
-/*
- * GIN server
- */
+// GIN server
 func main() {
-
 	PORT, exists := os.LookupEnv("PORT")
 	if !exists {
 		PORT = "8080"
@@ -71,7 +104,7 @@ func main() {
 		})
 	})
 	router.GET("/ws", func(c *gin.Context) {
-		wshandler(c.Writer, c.Request)
+		handleWebSocket(c)
 	})
 
 	api := router.Group("/api")
@@ -82,12 +115,14 @@ func main() {
 			fileList, err := os.ReadDir("./data")
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
 			}
 
 			for _, file := range fileList {
 				report, err := readSummaryFile(file.Name())
 				if err != nil {
 					c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+					return
 				}
 				results = append(results, report)
 			}
@@ -98,26 +133,28 @@ func main() {
 			report, err := readSummaryFile(host)
 			if err != nil {
 				c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+				return
 			}
 			c.JSON(http.StatusOK, gin.H{"data": report})
 		})
 	}
 
 	router.GET("/results", func(c *gin.Context) {
-		results, err := http.Get("http://0.0.0.0:8080/api/results")
+		results, err := http.Get(fmt.Sprintf("http://0.0.0.0:%s/api/results", PORT))
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		}
 		defer results.Body.Close()
 
 		if results.StatusCode != http.StatusOK {
-			c.HTML(http.StatusOK, "<div><p>No results found</p></div>", gin.H{})
+			c.HTML(http.StatusNotFound, "no_results.html", gin.H{})
+			return
 		}
-
 		var dataResponse map[string][]ReportSummary
 		err = json.NewDecoder(results.Body).Decode(&dataResponse)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
 		}
 		c.HTML(http.StatusOK, "results.html", gin.H{
 			"results": dataResponse["results"],

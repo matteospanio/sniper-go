@@ -6,16 +6,14 @@ WORKDIR /sniper-go
 
 COPY . .
 
-RUN go mod download
+RUN apt update && apt install -y nodejs npm && npm install -g yarn
 
-RUN apt update && apt install -y nodejs npm
+RUN yarn install
 
-RUN npm install
-
-RUN npm run build
+RUN yarn build
 
 RUN make build
 
 EXPOSE 8080
 
-ENTRYPOINT ["./bin/sniper-go"]
+CMD ["./bin/sniper-go"]

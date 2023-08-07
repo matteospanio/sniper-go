@@ -1,23 +1,27 @@
 import { Controller } from '@hotwired/stimulus'
+import { cleanStringColors } from '../utils';
 import { websocket } from '../ws';
+
 
 export default class extends Controller {
     static targets = ['input', 'output']
-
-    declare readonly hasInputTarget: boolean
+    
     declare readonly inputTarget: HTMLInputElement
-    declare readonly inputTargets: HTMLInputElement[]
-
-    declare readonly hasOutputTarget: boolean
     declare readonly outputTarget: HTMLInputElement
-    declare readonly outputTargets: HTMLInputElement[]
 
     connect() {
-        console.log('socket controller');
+        websocket.onmessage = (msg) => {
+            this.writeOutput(cleanStringColors(msg.data))
+        }
+    }
+
+    writeOutput(msg: string) {
+        this.outputTarget.innerText += `${msg}\n`
     }
 
     sendInput() {
-        let data = this.inputTarget.value
+        const data = this.inputTarget.value
+        this.outputTarget.innerText += `\n~ ${data}\n`
         websocket.send(data)
     }
 }

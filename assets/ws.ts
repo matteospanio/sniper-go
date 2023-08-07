@@ -1,5 +1,1 @@
-export const websocket = new WebSocket("ws://localhost:8080/ws");
-
-websocket.onmessage = function (msg) {
-    console.log(msg)
-}
+export const websocket = new WebSocket("ws://0.0.0.0:8080/ws");

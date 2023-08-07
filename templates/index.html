@@ -1,11 +1,20 @@
 {{ template "base" . }}
 {{define "body"}}
-<div class="p-5 container-md mb-3">
+<div class="p-5 container-md mb-3" data-controller="terminal">
     <div class="row">
-        <label class="form-label" for="input">Scan Target</label>
         <div class="input-group">
-            <input type="text" class="form-control"  id="input" data-socket-target='input' placeholder="type an IP address or host name" aria-label="target host" aria-describedby="btn">
-            <button data-action='socket#sendInput' id="btn" class="btn btn-primary" type="button">Snipe!</button>
+            <input type="text" class="form-control"  id="input" data-terminal-target='input' placeholder="type an IP address or host name" aria-label="target host" aria-describedby="btn">
+            <button data-action='click->terminal#sendInput' id="btn" class="btn btn-primary" type="button">Snipe!</button>
+        </div>
+    </div>
+    <div class="my-3 row justify-content-center">
+        <div style="max-height:250px !important;" class="overflow-scroll col-lg-10 rounded text-bg-dark">
+            <pre>
+                <code data-terminal-target="output">
+~ whoami
+root
+                </code>
+            </pre>
         </div>
     </div>
     <div class="row mt-5">
