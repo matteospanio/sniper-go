@@ -15,7 +15,9 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"sort"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
@@ -115,7 +117,9 @@ func main() {
 	api := router.Group("/api")
 	{
 		api.GET("/results", func(c *gin.Context) {
-			var results []ReportSummary
+			var results []map[string]interface{}
+
+			query := strings.Trim(c.Query("q"), " \t\n")
 
 			fileList, err := os.ReadDir(sniper_report_path)
 			if err != nil {
@@ -129,7 +133,34 @@ func main() {
 					c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 					return
 				}
-				results = append(results, report)
+
+				date, err := getDate(file.Name())
+				if err != nil {
+					c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+					return
+				}
+
+				tmp := map[string]interface{}{
+					"date":    date,
+					"summary": report,
+					"host":    file.Name(),
+				}
+
+				results = append(results, tmp)
+			}
+
+			sort.Slice(results, func(i, j int) bool {
+				return results[i]["date"].(time.Time).After(results[j]["date"].(time.Time))
+			})
+
+			if query != "" {
+				var filteredResults []map[string]interface{}
+				for _, result := range results {
+					if strings.Contains(result["host"].(string), query) {
+						filteredResults = append(filteredResults, result)
+					}
+				}
+				results = filteredResults
 			}
 			c.JSON(http.StatusOK, gin.H{"results": results})
 		})
@@ -145,7 +176,8 @@ func main() {
 	}
 
 	router.GET("/results", func(c *gin.Context) {
-		results, err := http.Get(fmt.Sprintf("http://0.0.0.0:%s/api/results", PORT))
+		query := c.Query("query")
+		results, err := http.Get(fmt.Sprintf("http://0.0.0.0:%s/api/results?q=%s", PORT, query))
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		}
@@ -155,7 +187,7 @@ func main() {
 			c.HTML(http.StatusNotFound, "no_results.html", gin.H{})
 			return
 		}
-		var dataResponse map[string][]ReportSummary
+		var dataResponse map[string][]interface{}
 		err = json.NewDecoder(results.Body).Decode(&dataResponse)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -175,7 +207,7 @@ func main() {
 		defer results.Body.Close()
 
 		if results.StatusCode != http.StatusOK {
-			c.HTML(http.StatusNotFound, "no_results.html", gin.H{})
+			c.HTML(http.StatusNotFound, "results.html", gin.H{})
 			return
 		}
 		var dataResponse map[string]Report
@@ -194,5 +226,4 @@ func main() {
 		fmt.Println(err.Error())
 		return
 	}
-
 }

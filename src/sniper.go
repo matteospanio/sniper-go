@@ -14,17 +14,17 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // The vulnerability report from sn1per
 type ReportSummary struct {
-	Host     string `json:"host"`
-	Critical int    `json:"critical"`
-	High     int    `json:"high"`
-	Medium   int    `json:"medium"`
-	Low      int    `json:"low"`
-	Info     int    `json:"info"`
-	Score    int    `json:"score"`
+	Critical int `json:"critical"`
+	High     int `json:"high"`
+	Medium   int `json:"medium"`
+	Low      int `json:"low"`
+	Info     int `json:"info"`
+	Score    int `json:"score"`
 }
 
 type Vulnerability struct {
@@ -39,7 +39,7 @@ type Report struct {
 	Host            Target          `json:"host"`
 	Vulnerabilities []Vulnerability `json:"vulnerabilities"`
 	Summary         ReportSummary   `json:"summary"`
-	Date            string          `json:"date"`
+	Date            time.Time       `json:"date"`
 }
 
 // Target's name and IP address
@@ -81,7 +81,6 @@ func readSummaryFile(host string) (ReportSummary, error) {
 	scr, _ := strconv.Atoi(matches[6])
 
 	return ReportSummary{
-		Host:     host,
 		Critical: crt,
 		High:     hig,
 		Medium:   med,
@@ -120,8 +119,43 @@ func getTarget(host string) (Target, error) {
 	return result, nil
 }
 
+func getDate(host string) (time.Time, error) {
+	content, err := os.ReadFile(
+		fmt.Sprintf(
+			"%s/%s/scans/tasks.txt",
+			sniper_report_path,
+			host,
+		))
+	if err != nil {
+		return time.Now(), err
+	}
+
+	contentStr := string(content)
+	re := regexp.MustCompile(`(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2})`)
+	matches := re.FindStringSubmatch(contentStr)
+	if len(matches) < 3 || matches == nil {
+		return time.Now(), fmt.Errorf("regxep: no matches for %s", host)
+	}
+
+	date := matches[1]
+	hour := matches[2]
+
+	result, err := time.Parse("2006-01-02 15:04", fmt.Sprintf("%s %s", date, hour))
+	if err != nil {
+		return time.Now(), err
+	}
+
+	return result, nil
+}
+
 func createReport(host string) (Report, error) {
 	var result Report
+
+	date, err := getDate(host)
+	if err != nil {
+		return Report{}, err
+	}
+	result.Date = date
 
 	target, err := getTarget(host)
 	if err != nil {

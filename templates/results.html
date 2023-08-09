@@ -1,5 +1,6 @@
-<div class="my-3 p-3 bg-body rounded shadow-sm">
-    <h2 class="border-bottom pb-2 mb-0">Results</h2>
+{{ if not .results }}
+<div><p>No results found</p></div>
+{{ else }}
     {{ range .results }}
     <div class="d-flex text-body-secondary pt-3">
         <svg class="bd-placeholder-img flex-shrink-0 me-2 rounded" width="32" height="32" xmlns="http://www.w3.org/2000/svg"
@@ -10,18 +11,17 @@
         </svg>
         <div class="pb-3 mb-0 small lh-sm border-bottom w-100">
             <div class="d-flex justify-content-between">
-                <span><strong class="text-gray-dark" data-results-target="title">{{ .Host }}:</strong></span>
-                <span href="#">Score: {{ .Score }}</span>
+                <a class="link-underline-opacity-0 link-underline" href="/results/{{.host}}" target="_blank"><strong class="text-gray-dark" data-results-target="title">{{ .host }}:</strong></a>
+                <span href="#">Score: {{ .summary.score }}</span>
             </div>
-
             <p class="d-block">
-                <span class="badge rounded-pill text-bg-dark">Critical {{ .Critical }}</span>
-                <span class="badge rounded-pill text-bg-danger">High {{ .High }}</span>
-                <span class="badge rounded-pill text-bg-warning">Medium {{ .Medium }}</span>
-                <span class="badge rounded-pill text-bg-info">Low {{ .Medium }}</span>
-                <span class="badge rounded-pill text-bg-success">Info {{ .Info }}</span>
+                <span class="badge rounded-pill text-bg-dark">Critical {{ .summary.critical }}</span>
+                <span class="badge rounded-pill text-bg-danger">High {{ .summary.high }}</span>
+                <span class="badge rounded-pill text-bg-warning">Medium {{ .summary.medium }}</span>
+                <span class="badge rounded-pill text-bg-info">Low {{ .summary.low }}</span>
+                <span class="badge rounded-pill text-bg-success">Info {{ .summary.info }}</span>
             </p>
         </div>
     </div>
     {{ end }}
-</div>
+{{ end }}

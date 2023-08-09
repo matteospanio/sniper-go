@@ -18,7 +18,18 @@ root
         </div>
     </div>
     <div class="row mt-5">
-        <div id="results" data-controller="results"></div>
+        <div id="results" >
+            <div class="my-3 p-3 bg-body rounded shadow-sm">
+                <div class="d-flex justify-content-between">
+                    <h2 class="border-bottom pb-2 mb-0">Results</h2>
+                    <span class="d-flex" data-controller="search">
+                        <input data-search-target="input" data-results-target="input" data-action="results#filter" class="d-none form-control me-2" type="search" placeholder="Filter results" aria-label="Search">
+                        <button data-search-target="btn" data-action="search#toggle" class="btn btn-outline-success"><i class="fa-solid fa-search"></i></button>
+                    </span>
+                </div>
+                <span data-results-target="output"></span>
+            </div>
+        </div>
     </div>
 </div>
 {{end}}
