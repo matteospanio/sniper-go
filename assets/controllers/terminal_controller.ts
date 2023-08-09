@@ -17,7 +17,6 @@ export default class extends Controller {
         websocket.onmessage = (msg) => {
             const data = msg.data
             if (data === '[DONE]') {
-                websocket.send('exit')
                 websocket.close()
                 this.inputTarget.value = ''
                 this.resultsOutlet.load()
