@@ -44,6 +44,9 @@ func handleWebSocket(c *gin.Context) {
 
 		fmt.Printf("Processing: %s\n", msg)
 		command := strings.Split(string(msg), " ")
+		if command[0] == "exit" {
+			return
+		}
 		cmd := exec.Command(command[0], command[1:]...)
 
 		stdout, err := cmd.StdoutPipe()
