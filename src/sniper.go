@@ -11,11 +11,8 @@ import (
 	"fmt"
 	"net"
 	"os"
-	"os/exec"
 	"regexp"
 	"strconv"
-
-	"github.com/gin-gonic/gin"
 )
 
 // The vulnerability report from sn1per
@@ -29,17 +26,35 @@ type ReportSummary struct {
 	Score    int    `json:"score"`
 }
 
+type Vulnerability struct {
+	Name        string   `json:"name"`
+	Severity    string   `json:"severity"`
+	Description string   `json:"description"`
+	Remediation string   `json:"remediation"`
+	References  []string `json:"references"`
+}
+
+type Report struct {
+	Host            Target          `json:"host"`
+	Vulnerabilities []Vulnerability `json:"vulnerabilities"`
+	Summary         ReportSummary   `json:"summary"`
+	Date            string          `json:"date"`
+}
+
 // Target's name and IP address
 type Target struct {
 	Name string     `json:"name"`
 	IP   net.IPAddr `json:"ip"`
 }
 
+const sniper_report_path = "/usr/share/sniper/loot/workspace"
+
 func readSummaryFile(host string) (ReportSummary, error) {
 	// Parse file
 	content, err := os.ReadFile(
 		fmt.Sprintf(
-			"./data/%s/vulnerabilities/vulnerability-report-%s.txt",
+			"%s/%s/vulnerabilities/vulnerability-report-%s.txt",
+			sniper_report_path,
 			host,
 			host,
 		))
@@ -76,20 +91,14 @@ func readSummaryFile(host string) (ReportSummary, error) {
 
 }
 
-func snipe(c *gin.Context) {
-	cCp := c.Copy()
+func createReport(host string) (Report, error) {
+	var result Report
 
-	go func() {
-		var command = fmt.Sprintf("sniper -t %s", cCp.Query("target"))
-		cmd, err := exec.Command("bash", "-c", command).Output()
+	summary, err := readSummaryFile(host)
+	if err != nil {
+		return Report{}, err
+	}
+	result.Summary = summary
 
-		if err != nil {
-			fmt.Println(err.Error())
-			c.JSON(500, gin.H{"error": err.Error()})
-		} else {
-			c.JSON(200, gin.H{"output": string(cmd)})
-		}
-	}()
-
-	c.JSON(200, gin.H{"message": "Snipe started"})
+	return result, nil
 }

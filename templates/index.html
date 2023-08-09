@@ -1,6 +1,6 @@
 {{ template "base" . }}
 {{define "body"}}
-<div class="p-5 container-md mb-3" data-controller="terminal">
+<div class="p-5 container-md mb-3" data-terminal-results-outlet="#results" data-controller="terminal">
     <div class="row">
         <div class="input-group">
             <input type="text" class="form-control"  id="input" data-terminal-target='input' placeholder="type an IP address or host name" aria-label="target host" aria-describedby="btn">
@@ -18,7 +18,7 @@ root
         </div>
     </div>
     <div class="row mt-5">
-        <div data-controller="results"></div>
+        <div id="results" data-controller="results"></div>
     </div>
 </div>
 {{end}}

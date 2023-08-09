@@ -1,0 +1,18 @@
+{{ define "report" }}
+<!DOCTYPE html>
+<html data-controller="theme" data-theme-theme-value="light" data-theme-icon-value="fa-moon" lang="en">
+    <head>
+        <title>Report {{ .Host.Name }}</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+    </head>
+    <body>
+        <h1>Report {{ .Host.Name }}</h1>
+        <ul>
+        {{ range .Vulnerabilities }}
+            <li>{{ .Name }}</li>
+        {{ end }}
+        </ul>
+    </body>
+</html>
+{{ end }}

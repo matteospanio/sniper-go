@@ -69,6 +69,8 @@ func handleWebSocket(c *gin.Context) {
 				f.WriteString(line + "\n")
 				conn.WriteMessage(websocket.TextMessage, []byte(html.EscapeString(line)))
 			}
+
+			conn.WriteMessage(websocket.TextMessage, []byte("[DONE]"))
 		}()
 
 		cmd.Wait()
@@ -112,7 +114,7 @@ func main() {
 		api.GET("/results", func(c *gin.Context) {
 			var results []ReportSummary
 
-			fileList, err := os.ReadDir("./data")
+			fileList, err := os.ReadDir(sniper_report_path)
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
@@ -130,7 +132,7 @@ func main() {
 		})
 		api.GET("/results/:hostName", func(c *gin.Context) {
 			host := c.Param("hostName")
-			report, err := readSummaryFile(host)
+			report, err := createReport(host)
 			if err != nil {
 				c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 				return
@@ -158,6 +160,29 @@ func main() {
 		}
 		c.HTML(http.StatusOK, "results.html", gin.H{
 			"results": dataResponse["results"],
+		})
+	})
+
+	router.GET("/results/:hostName", func(c *gin.Context) {
+		host := c.Param("hostName")
+		results, err := http.Get(fmt.Sprintf("http://0.0.0.0:%s/api/results/%s", PORT, host))
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		}
+		defer results.Body.Close()
+
+		if results.StatusCode != http.StatusOK {
+			c.HTML(http.StatusNotFound, "no_results.html", gin.H{})
+			return
+		}
+		var dataResponse map[string]Report
+		err = json.NewDecoder(results.Body).Decode(&dataResponse)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		c.HTML(http.StatusOK, "report.html", gin.H{
+			"report": dataResponse["data"],
 		})
 	})
 

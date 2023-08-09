@@ -1,21 +1,35 @@
 import { Controller } from '@hotwired/stimulus'
 import { cleanStringColors } from '../utils';
 import { websocket } from '../ws';
+import ResultsController from './results_controller';
 
 
 export default class extends Controller {
     static targets = ['input', 'output']
+    static outlets = ['results']
     
     declare readonly inputTarget: HTMLInputElement
     declare readonly outputTarget: HTMLInputElement
+    declare readonly resultsOutlet: ResultsController
 
     connect() {
         websocket.onmessage = (msg) => {
-            this.writeOutput(cleanStringColors(msg.data))
+            const data = msg.data
+            if (data === '[DONE]') {
+                this.inputTarget.value = ''
+                this.resultsOutlet.load()
+            } else {
+                this.writeOutput(cleanStringColors(data))
+            }
         }
     }
 
     writeOutput(msg: string) {
+        let lines = this.outputTarget.innerText.split('\n')
+        if (lines.length === 1000) {
+            lines.shift()
+            this.outputTarget.innerText = lines.join('\n')
+        }
         this.outputTarget.innerText += `${msg}\n`
     }
 

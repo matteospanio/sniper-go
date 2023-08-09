@@ -29,3 +29,7 @@ func ParseTemplateDir(dir string) (*template.Template, error) {
 	}
 	return template.ParseFiles(paths...)
 }
+
+func GenerateReport() {
+	// TODO
+}
