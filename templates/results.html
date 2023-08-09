@@ -10,15 +10,16 @@
         </svg>
         <div class="pb-3 mb-0 small lh-sm border-bottom w-100">
             <div class="d-flex justify-content-between">
-                <strong class="text-gray-dark">{{ .Host }}:</strong>
+                <span><strong class="text-gray-dark" data-results-target="title">{{ .Host }}:</strong></span>
                 <span href="#">Score: {{ .Score }}</span>
             </div>
 
             <p class="d-block">
-                <span class="badge text-bg-dark">Critical {{ .Critical }}</span>
-                <span class="badge text-bg-danger">High {{ .High }}</span>
-                <span class="badge text-bg-warning">Medium {{ .Medium }}</span>
-                <span class="badge text-bg-info">Info {{ .Info }}</span>
+                <span class="badge rounded-pill text-bg-dark">Critical {{ .Critical }}</span>
+                <span class="badge rounded-pill text-bg-danger">High {{ .High }}</span>
+                <span class="badge rounded-pill text-bg-warning">Medium {{ .Medium }}</span>
+                <span class="badge rounded-pill text-bg-info">Low {{ .Medium }}</span>
+                <span class="badge rounded-pill text-bg-success">Info {{ .Info }}</span>
             </p>
         </div>
     </div>

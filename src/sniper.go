@@ -13,6 +13,7 @@ import (
 	"os"
 	"regexp"
 	"strconv"
+	"strings"
 )
 
 // The vulnerability report from sn1per
@@ -43,8 +44,8 @@ type Report struct {
 
 // Target's name and IP address
 type Target struct {
-	Name string     `json:"name"`
-	IP   net.IPAddr `json:"ip"`
+	Name string `json:"name"`
+	IP   string `json:"ip"`
 }
 
 const sniper_report_path = "/usr/share/sniper/loot/workspace"
@@ -91,8 +92,42 @@ func readSummaryFile(host string) (ReportSummary, error) {
 
 }
 
+func getTarget(host string) (Target, error) {
+	result := Target{}
+
+	content, err := os.ReadFile(
+		fmt.Sprintf(
+			"%s/%s/domains/targets-all-sorted.txt",
+			sniper_report_path,
+			host,
+		))
+	if err != nil {
+		return Target{}, err
+	}
+
+	contentStr := strings.Split(string(content), "\n")
+	for _, line := range contentStr {
+		trimmedLine := strings.TrimSpace(line)
+		if isIP(trimmedLine) {
+			result.IP = net.ParseIP(trimmedLine).String()
+			break
+		} else if trimmedLine != "" {
+			result.Name = trimmedLine
+		} else {
+			continue
+		}
+	}
+	return result, nil
+}
+
 func createReport(host string) (Report, error) {
 	var result Report
+
+	target, err := getTarget(host)
+	if err != nil {
+		return Report{}, err
+	}
+	result.Host = target
 
 	summary, err := readSummaryFile(host)
 	if err != nil {

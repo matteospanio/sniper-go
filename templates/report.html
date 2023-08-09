@@ -1,18 +1,41 @@
-{{ define "report" }}
 <!DOCTYPE html>
-<html data-controller="theme" data-theme-theme-value="light" data-theme-icon-value="fa-moon" lang="en">
+<html lang="en">
     <head>
-        <title>Report {{ .Host.Name }}</title>
+        <title>Report {{ if .report.Host.Name }} {{ .report.Host.Name }} {{ end}} {{ if .report.Host.IP }} : {{ .report.Host.IP }} {{end}}</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
     </head>
     <body>
-        <h1>Report {{ .Host.Name }}</h1>
+        <h1>Report {{ if .report.Host.Name }} {{ .report.Host.Name }} {{ end}} {{ if .report.Host.IP }} : {{ .report.Host.IP }} {{end}}</h1>
+        <div>
+            <h2>Summary</h2>
+            <table>
+                <tr>
+                    <th>Critical</th>
+                    <td>{{ .report.Summary.Critical }}</td>
+                </tr>
+                <tr>
+                    <th>High</th>
+                    <td>{{ .report.Summary.High }}</td>
+                </tr>
+                <tr>
+                    <th>Medium</th>
+                    <td>{{ .report.Summary.Medium }}</td>
+                </tr>
+                <tr>
+                    <th>Low</th>
+                    <td>{{ .report.Summary.Low }}</td>
+                </tr>
+                <tr>
+                    <th>Info</th>
+                    <td>{{ .report.Summary.Info }}</td>
+                </tr>
+            </table>
+        </div>
         <ul>
-        {{ range .Vulnerabilities }}
-            <li>{{ .Name }}</li>
+        {{ range .report.Vulnerabilities }}
+            <li>{{ .report.Name }}</li>
         {{ end }}
         </ul>
     </body>
 </html>
-{{ end }}
