@@ -4,9 +4,10 @@ import { getWebSocket } from '../ws';
 import ResultsController from './results_controller';
 
 export default class extends Controller {
-    static targets = ['input', 'output']
+    static targets = ['input', 'output', 'btn']
     static outlets = ['results']
     
+    declare readonly btnTarget: HTMLButtonElement
     declare readonly inputTarget: HTMLInputElement
     declare readonly outputTarget: HTMLInputElement
     declare readonly resultsOutlet: ResultsController
@@ -17,9 +18,9 @@ export default class extends Controller {
         websocket.onmessage = (msg) => {
             const data = msg.data
             if (data === '[DONE]') {
-                websocket.close()
                 this.inputTarget.value = ''
                 this.resultsOutlet.load()
+                this.btnTarget.disabled = false
             } else {
                 this.writeOutput(cleanStringColors(data))
             }
@@ -37,6 +38,7 @@ export default class extends Controller {
 
     sendInput() {
         const data = this.inputTarget.value
+        this.btnTarget.disabled = true
         this.outputTarget.innerText += `\n~ ${data}\n`
         getWebSocket().send(data)
     }
