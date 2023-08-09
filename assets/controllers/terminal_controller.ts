@@ -1,4 +1,5 @@
 import { Controller } from '@hotwired/stimulus'
+import { decode } from 'he';
 import { cleanStringColors } from '../utils';
 import { getWebSocket } from '../ws';
 import ResultsController from './results_controller';
@@ -22,7 +23,7 @@ export default class extends Controller {
                 this.resultsOutlet.load()
                 this.btnTarget.disabled = false
             } else {
-                this.writeOutput(cleanStringColors(data))
+                this.writeOutput(cleanStringColors(decode(data)))
             }
         }
     }
