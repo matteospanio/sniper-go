@@ -83,7 +83,7 @@ func createReport(host string) (Report, error) {
 
 func readSummaryFile(host string) (ReportSummary, error) {
 	// Parse file
-	content, err := readSniperFile(host, "vulnerabilities/vulnerability-report.txt")
+	content, err := readSniperFile(host, fmt.Sprintf("vulnerabilities/vulnerability-report-%s.txt", host))
 	if err != nil {
 		return ReportSummary{}, err
 	}
@@ -189,7 +189,7 @@ func getScreenshots(host string) []string {
 func getDetails(host string) ([]Vulnerability, error) {
 	var result []Vulnerability
 
-	content, err := readSniperFile(host, "vulnerabilities/vulnerability-report.txt")
+	content, err := readSniperFile(host, fmt.Sprintf("vulnerabilities/vulnerability-report-%s.txt", host))
 	if err != nil {
 		return []Vulnerability{}, err
 	}
