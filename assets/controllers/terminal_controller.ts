@@ -33,7 +33,8 @@ export default class extends Controller {
             lines.shift()
             this.outputTarget.innerText = lines.join('\n')
         }
-        this.outputTarget.innerHTML += `${parseFormatAnsi(msg)}<br class="m-0 p-0">`
+        this.outputTarget.innerHTML += `${parseFormatAnsi(msg)}\n`
+        this.outputTarget.scrollTop = this.outputTarget.scrollHeight
     }
 
     sendInput() {

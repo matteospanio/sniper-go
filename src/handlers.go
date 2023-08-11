@@ -28,18 +28,13 @@ func handleWebSocket(c *gin.Context) {
 		}
 
 		fmt.Printf("Processing: %s\n", msg)
-		command := strings.Split(string(msg), " ")
-		if command[0] == "exit" {
+		command := string(msg)
+		if command == "exit" {
 			break
 		}
-		cmd := exec.Command(command[0], command[1:]...)
+		cmd := exec.Command("bash", "-c", command)
 
-		stdout, err := cmd.StdoutPipe()
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-
+		stdout, _ := cmd.StdoutPipe()
 		cmd.Start()
 
 		scanner := bufio.NewScanner(stdout)
