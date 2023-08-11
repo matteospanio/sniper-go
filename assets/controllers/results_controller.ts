@@ -2,7 +2,9 @@ import { Controller } from '@hotwired/stimulus'
 
 export default class extends Controller<HTMLElement> {
     static targets = ['input', 'output']
+    static values = { query: String }
 
+    declare queryValue: string
     declare readonly inputTarget: HTMLInputElement
     declare readonly outputTarget: HTMLInputElement
 
@@ -10,9 +12,13 @@ export default class extends Controller<HTMLElement> {
         this.load()
     }
 
+    queryValueChanged() {
+        this.load(this.queryValue)
+    }
+
     filter() {
         const query = this.inputTarget.value.trim()
-        this.load(query)
+        this.queryValue = query
     }
 
     load(query: string = '') {

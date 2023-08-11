@@ -52,21 +52,13 @@ const sniper_report_path = "/usr/share/sniper/loot/workspace"
 
 func readSummaryFile(host string) (ReportSummary, error) {
 	// Parse file
-	content, err := os.ReadFile(
-		fmt.Sprintf(
-			"%s/%s/vulnerabilities/vulnerability-report-%s.txt",
-			sniper_report_path,
-			host,
-			host,
-		))
+	content, err := readVulnerabilityReport(host)
 	if err != nil {
 		return ReportSummary{}, err
 	}
 
-	contentStr := string(content)
-
 	re := regexp.MustCompile(`Critical: (\d+)\nHigh: (\d+)\nMedium: (\d+)\nLow: (\d+)\nInfo: (\d+)\nScore: (\d+)`)
-	matches := re.FindStringSubmatch(contentStr)
+	matches := re.FindStringSubmatch(content)
 
 	if len(matches) < 7 || matches == nil {
 		return ReportSummary{}, fmt.Errorf("regxep: no matches for %s", host)
@@ -168,6 +160,62 @@ func createReport(host string) (Report, error) {
 		return Report{}, err
 	}
 	result.Summary = summary
+
+	return result, nil
+}
+
+func readVulnerabilityReport(host string) (string, error) {
+	content, err := os.ReadFile(
+		fmt.Sprintf(
+			"%s/%s/vulnerabilities/vulnerability-report-%s.txt",
+			sniper_report_path,
+			host,
+			host,
+		))
+	if err != nil {
+		return "", err
+	}
+
+	return string(content), nil
+}
+
+func getDetails(host string) ([]Vulnerability, error) {
+	var result []Vulnerability
+
+	content, err := readVulnerabilityReport(host)
+	if err != nil {
+		return []Vulnerability{}, err
+	}
+
+	// skip first 10 lines of content
+	lines := strings.Split(content, "\n")[10:]
+	for _, line := range lines {
+		if line == "" {
+			continue
+		}
+
+		// parse line
+		re := regexp.MustCompile(`(\w+) (.*)`)
+		matches := re.FindStringSubmatch(line)
+		if len(matches) < 3 || matches == nil {
+			return []Vulnerability{}, fmt.Errorf("regxep: no matches for %s", host)
+		}
+
+		// parse references
+		references := strings.Split(matches[2], ", ")
+		for i := range references {
+			references[i] = strings.TrimSpace(references[i])
+		}
+
+		// append to result
+		result = append(result, Vulnerability{
+			Name:        matches[1],
+			Severity:    matches[1],
+			Description: matches[2],
+			Remediation: "",
+			References:  references,
+		})
+	}
 
 	return result, nil
 }
