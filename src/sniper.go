@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -239,4 +240,51 @@ func readSniperFile(host string, filePath string) (string, error) {
 	}
 
 	return string(content), nil
+}
+
+func getResults(query string) ([]map[string]interface{}, error) {
+	var results []map[string]interface{}
+
+	query = strings.Trim(query, " \t\n")
+
+	fileList, err := os.ReadDir(sniper_report_path)
+	if err != nil {
+		return results, err
+	}
+
+	for _, file := range fileList {
+		report, err := readSummaryFile(file.Name())
+		if err != nil {
+			return results, err
+		}
+
+		date, err := getDate(file.Name())
+		if err != nil {
+			return results, err
+		}
+
+		tmp := map[string]interface{}{
+			"date":    date,
+			"summary": report,
+			"host":    file.Name(),
+		}
+
+		results = append(results, tmp)
+	}
+
+	sort.Slice(results, func(i, j int) bool {
+		return results[i]["date"].(time.Time).After(results[j]["date"].(time.Time))
+	})
+
+	if query != "" {
+		var filteredResults []map[string]interface{}
+		for _, result := range results {
+			if strings.Contains(result["host"].(string), query) {
+				filteredResults = append(filteredResults, result)
+			}
+		}
+		results = filteredResults
+	}
+
+	return results, nil
 }

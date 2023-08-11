@@ -8,16 +8,9 @@
 package main
 
 import (
-	"bufio"
-	"encoding/json"
 	"fmt"
-	"html"
 	"net/http"
 	"os"
-	"os/exec"
-	"sort"
-	"strings"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
@@ -33,51 +26,6 @@ var wsupgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
 	CheckOrigin:     func(r *http.Request) bool { return true },
-}
-
-func handleWebSocket(c *gin.Context) {
-	conn, err := wsupgrader.Upgrade(c.Writer, c.Request, nil)
-	if err != nil {
-		fmt.Println("Failed to set websocket upgrade: ", err)
-		return
-	}
-	defer conn.Close()
-
-	for {
-		_, msg, err := conn.ReadMessage()
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-
-		fmt.Printf("Processing: %s\n", msg)
-		command := strings.Split(string(msg), " ")
-		if command[0] == "exit" {
-			break
-		}
-		cmd := exec.Command(command[0], command[1:]...)
-
-		stdout, err := cmd.StdoutPipe()
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-
-		cmd.Start()
-
-		scanner := bufio.NewScanner(stdout)
-
-		go func() {
-			for scanner.Scan() {
-				line := scanner.Text()
-				conn.WriteMessage(websocket.TextMessage, []byte(html.EscapeString(line)))
-			}
-
-			conn.WriteMessage(websocket.TextMessage, []byte("[DONE]"))
-		}()
-
-		cmd.Wait()
-	}
 }
 
 // GIN server
@@ -108,116 +56,19 @@ func main() {
 			"title": "Sn1per web interface",
 		})
 	})
+
 	router.GET("/ws", func(c *gin.Context) {
 		handleWebSocket(c)
 	})
 
 	api := router.Group("/api")
 	{
-		api.GET("/results", func(c *gin.Context) {
-			var results []map[string]interface{}
-
-			query := strings.Trim(c.Query("q"), " \t\n")
-
-			fileList, err := os.ReadDir(sniper_report_path)
-			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-				return
-			}
-
-			for _, file := range fileList {
-				report, err := readSummaryFile(file.Name())
-				if err != nil {
-					c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-					return
-				}
-
-				date, err := getDate(file.Name())
-				if err != nil {
-					c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-					return
-				}
-
-				tmp := map[string]interface{}{
-					"date":    date,
-					"summary": report,
-					"host":    file.Name(),
-				}
-
-				results = append(results, tmp)
-			}
-
-			sort.Slice(results, func(i, j int) bool {
-				return results[i]["date"].(time.Time).After(results[j]["date"].(time.Time))
-			})
-
-			if query != "" {
-				var filteredResults []map[string]interface{}
-				for _, result := range results {
-					if strings.Contains(result["host"].(string), query) {
-						filteredResults = append(filteredResults, result)
-					}
-				}
-				results = filteredResults
-			}
-			c.JSON(http.StatusOK, gin.H{"results": results})
-		})
-		api.GET("/results/:hostName", func(c *gin.Context) {
-			host := c.Param("hostName")
-			report, err := createReport(host)
-			if err != nil {
-				c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
-				return
-			}
-			c.JSON(http.StatusOK, gin.H{"data": report})
-		})
+		api.GET("/results", handleApiResults)
+		api.GET("/results/:hostName", handleApiSingleResult)
 	}
 
-	router.GET("/results", func(c *gin.Context) {
-		query := c.Query("query")
-		results, err := http.Get(fmt.Sprintf("http://0.0.0.0:%s/api/results?q=%s", PORT, query))
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		}
-		defer results.Body.Close()
-
-		if results.StatusCode != http.StatusOK {
-			c.HTML(http.StatusNotFound, results_template, gin.H{})
-			return
-		}
-		var dataResponse map[string][]interface{}
-		err = json.NewDecoder(results.Body).Decode(&dataResponse)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-		c.HTML(http.StatusOK, results_template, gin.H{
-			"results": dataResponse["results"],
-		})
-	})
-
-	router.GET("/results/:hostName", func(c *gin.Context) {
-		host := c.Param("hostName")
-		results, err := http.Get(fmt.Sprintf("http://0.0.0.0:%s/api/results/%s", PORT, host))
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		}
-		defer results.Body.Close()
-
-		if results.StatusCode != http.StatusOK {
-			c.HTML(http.StatusNotFound, results_template, gin.H{})
-			return
-		}
-		var dataResponse map[string]Report
-		err = json.NewDecoder(results.Body).Decode(&dataResponse)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-		c.HTML(http.StatusOK, report_template, gin.H{
-			"report": dataResponse["data"],
-		})
-	})
+	router.GET("/results", handleResults)
+	router.GET("/results/:hostName", handleSingleResult)
 
 	err = router.Run(fmt.Sprintf("0.0.0.0:%s", PORT))
 	if err != nil {
