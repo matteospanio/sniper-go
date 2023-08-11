@@ -9,7 +9,6 @@ package main
 
 import (
 	"fmt"
-	"net"
 	"os"
 	"regexp"
 	"strconv"
@@ -40,6 +39,7 @@ type Report struct {
 	Vulnerabilities []Vulnerability `json:"vulnerabilities"`
 	Summary         ReportSummary   `json:"summary"`
 	Date            time.Time       `json:"date"`
+	Screens         []string        `json:"screens"`
 }
 
 // Target's name and IP address
@@ -50,9 +50,39 @@ type Target struct {
 
 const sniper_report_path = "/usr/share/sniper/loot/workspace"
 
+/*
+ * Create a report from the scan
+ * Return a Report struct
+ */
+func createReport(host string) (Report, error) {
+	var result Report
+
+	date, err := getDate(host)
+	if err != nil {
+		return Report{}, err
+	}
+	result.Date = date
+
+	target, err := getTarget(host)
+	if err != nil {
+		return Report{}, err
+	}
+	result.Host = target
+
+	summary, err := readSummaryFile(host)
+	if err != nil {
+		return Report{}, err
+	}
+	result.Summary = summary
+
+	result.Screens = getScreenshots(host)
+
+	return result, nil
+}
+
 func readSummaryFile(host string) (ReportSummary, error) {
 	// Parse file
-	content, err := readVulnerabilityReport(host)
+	content, err := readSniperFile(host, "vulnerabilities/vulnerability-report.txt")
 	if err != nil {
 		return ReportSummary{}, err
 	}
@@ -83,48 +113,43 @@ func readSummaryFile(host string) (ReportSummary, error) {
 
 }
 
+/* Read the vulnerability report from sn1per
+ * Return the content of the domains/targets-all-sorted.txt file
+ * and the content of the ips/ips-all-sorted.txt file
+ */
 func getTarget(host string) (Target, error) {
 	result := Target{}
 
-	content, err := os.ReadFile(
-		fmt.Sprintf(
-			"%s/%s/domains/targets-all-sorted.txt",
-			sniper_report_path,
-			host,
-		))
+	// find the host name
+	targets, err := readSniperFile(host, "domains/targets-all-sorted.txt")
 	if err != nil {
 		return Target{}, err
 	}
 
-	contentStr := strings.Split(string(content), "\n")
-	for _, line := range contentStr {
-		trimmedLine := strings.TrimSpace(line)
-		if isIP(trimmedLine) {
-			result.IP = net.ParseIP(trimmedLine).String()
-			break
-		} else if trimmedLine != "" {
-			result.Name = trimmedLine
-		} else {
-			continue
-		}
+	// find the host IP
+	ips, err := readSniperFile(host, "ips/ips-all-sorted.txt")
+	if err != nil {
+		return Target{}, err
 	}
+
+	result.Name = strings.Split(targets, "\n")[0]
+	result.IP = strings.Split(ips, "\n")[0]
+
 	return result, nil
 }
 
+/* Get the start moment of the scan
+ * Return the date from the scans/tasks.txt file
+ */
 func getDate(host string) (time.Time, error) {
-	content, err := os.ReadFile(
-		fmt.Sprintf(
-			"%s/%s/scans/tasks.txt",
-			sniper_report_path,
-			host,
-		))
+
+	content, err := readSniperFile(host, "scans/tasks.txt")
 	if err != nil {
 		return time.Now(), err
 	}
 
-	contentStr := string(content)
 	re := regexp.MustCompile(`(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2})`)
-	matches := re.FindStringSubmatch(contentStr)
+	matches := re.FindStringSubmatch(content)
 	if len(matches) < 3 || matches == nil {
 		return time.Now(), fmt.Errorf("regxep: no matches for %s", host)
 	}
@@ -140,49 +165,30 @@ func getDate(host string) (time.Time, error) {
 	return result, nil
 }
 
-func createReport(host string) (Report, error) {
-	var result Report
+func getScreenshots(host string) []string {
+	var result []string
 
-	date, err := getDate(host)
-	if err != nil {
-		return Report{}, err
-	}
-	result.Date = date
-
-	target, err := getTarget(host)
-	if err != nil {
-		return Report{}, err
-	}
-	result.Host = target
-
-	summary, err := readSummaryFile(host)
-	if err != nil {
-		return Report{}, err
-	}
-	result.Summary = summary
-
-	return result, nil
-}
-
-func readVulnerabilityReport(host string) (string, error) {
-	content, err := os.ReadFile(
+	files, err := os.ReadDir(
 		fmt.Sprintf(
-			"%s/%s/vulnerabilities/vulnerability-report-%s.txt",
+			"%s/%s/screenshots",
 			sniper_report_path,
-			host,
 			host,
 		))
 	if err != nil {
-		return "", err
+		return []string{}
 	}
 
-	return string(content), nil
+	for _, file := range files {
+		result = append(result, file.Name())
+	}
+
+	return result
 }
 
 func getDetails(host string) ([]Vulnerability, error) {
 	var result []Vulnerability
 
-	content, err := readVulnerabilityReport(host)
+	content, err := readSniperFile(host, "vulnerabilities/vulnerability-report.txt")
 	if err != nil {
 		return []Vulnerability{}, err
 	}
@@ -218,4 +224,19 @@ func getDetails(host string) ([]Vulnerability, error) {
 	}
 
 	return result, nil
+}
+
+func readSniperFile(host string, filePath string) (string, error) {
+	content, err := os.ReadFile(
+		fmt.Sprintf(
+			"%s/%s/%s",
+			sniper_report_path,
+			host,
+			filePath,
+		))
+	if err != nil {
+		return "", err
+	}
+
+	return string(content), nil
 }
