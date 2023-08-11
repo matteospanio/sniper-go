@@ -23,6 +23,12 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+const (
+	results_template = "results.html"
+	report_template  = "report.html"
+	index_template   = "index.html"
+)
+
 var wsupgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
@@ -62,16 +68,8 @@ func handleWebSocket(c *gin.Context) {
 		scanner := bufio.NewScanner(stdout)
 
 		go func() {
-			f, err := os.Create(fmt.Sprintf("./history/%s.txt", strings.Join(command, "_")))
-			if err != nil {
-				fmt.Println(err)
-				return
-			}
-			defer f.Close()
-
 			for scanner.Scan() {
 				line := scanner.Text()
-				f.WriteString(line + "\n")
 				conn.WriteMessage(websocket.TextMessage, []byte(html.EscapeString(line)))
 			}
 
@@ -106,7 +104,7 @@ func main() {
 	})
 
 	router.GET("/", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "index.html", gin.H{
+		c.HTML(http.StatusOK, index_template, gin.H{
 			"title": "Sn1per web interface",
 		})
 	})
@@ -184,7 +182,7 @@ func main() {
 		defer results.Body.Close()
 
 		if results.StatusCode != http.StatusOK {
-			c.HTML(http.StatusNotFound, "results.html", gin.H{})
+			c.HTML(http.StatusNotFound, results_template, gin.H{})
 			return
 		}
 		var dataResponse map[string][]interface{}
@@ -193,7 +191,7 @@ func main() {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
-		c.HTML(http.StatusOK, "results.html", gin.H{
+		c.HTML(http.StatusOK, results_template, gin.H{
 			"results": dataResponse["results"],
 		})
 	})
@@ -207,7 +205,7 @@ func main() {
 		defer results.Body.Close()
 
 		if results.StatusCode != http.StatusOK {
-			c.HTML(http.StatusNotFound, "results.html", gin.H{})
+			c.HTML(http.StatusNotFound, results_template, gin.H{})
 			return
 		}
 		var dataResponse map[string]Report
@@ -216,7 +214,7 @@ func main() {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
-		c.HTML(http.StatusOK, "report.html", gin.H{
+		c.HTML(http.StatusOK, report_template, gin.H{
 			"report": dataResponse["data"],
 		})
 	})
