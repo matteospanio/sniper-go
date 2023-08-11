@@ -184,7 +184,7 @@ func main() {
 		defer results.Body.Close()
 
 		if results.StatusCode != http.StatusOK {
-			c.HTML(http.StatusNotFound, "no_results.html", gin.H{})
+			c.HTML(http.StatusNotFound, "results.html", gin.H{})
 			return
 		}
 		var dataResponse map[string][]interface{}
