@@ -1,8 +1,8 @@
 import { Controller } from '@hotwired/stimulus'
 import { decode } from 'he';
-import { cleanStringColors } from '../utils';
-import { getWebSocket } from '../ws';
+import { websocket } from '../ws';
 import ResultsController from './results_controller';
+import { parseFormatAnsi } from '../utils';
 
 export default class extends Controller {
     static targets = ['input', 'output', 'btn']
@@ -14,16 +14,15 @@ export default class extends Controller {
     declare readonly resultsOutlet: ResultsController
 
     connect() {
-        const websocket = getWebSocket()
-
         websocket.onmessage = (msg) => {
             const data = msg.data
-            if (data === '[DONE]') {
+            console.log(data)
+            if (data === "[DONE]") {
                 this.inputTarget.value = ''
                 this.resultsOutlet.load()
                 this.btnTarget.disabled = false
             } else {
-                this.writeOutput(cleanStringColors(decode(data)))
+                this.writeOutput(decode(data))
             }
         }
     }
@@ -34,13 +33,13 @@ export default class extends Controller {
             lines.shift()
             this.outputTarget.innerText = lines.join('\n')
         }
-        this.outputTarget.innerText += `${msg}\n`
+        this.outputTarget.innerHTML += `${parseFormatAnsi(msg)}<br class="m-0 p-0">`
     }
 
     sendInput() {
         const data = this.inputTarget.value
         this.btnTarget.disabled = true
         this.outputTarget.innerText += `\n~ ${data}\n`
-        getWebSocket().send(data)
+        websocket.send(data)
     }
 }
