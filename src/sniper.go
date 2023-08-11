@@ -64,7 +64,7 @@ func createReport(host string) (Report, error) {
 	}
 	result.Date = date
 
-	target, err := getTarget(host)
+	target := getTarget(host)
 	if err != nil {
 		return Report{}, err
 	}
@@ -118,25 +118,26 @@ func readSummaryFile(host string) (ReportSummary, error) {
  * Return the content of the domains/targets-all-sorted.txt file
  * and the content of the ips/ips-all-sorted.txt file
  */
-func getTarget(host string) (Target, error) {
+func getTarget(host string) Target {
 	result := Target{}
+	if isIP(host) {
+		result.Name = ""
+		result.IP = host
+	} else {
+		result.Name = host
+		result.IP = ""
+	}
 
 	// find the host name
-	targets, err := readSniperFile(host, "domains/targets-all-sorted.txt")
-	if err != nil {
-		return Target{}, err
-	}
+	targets, _ := readSniperFile(host, "domains/targets-all-sorted.txt")
 
 	// find the host IP
-	ips, err := readSniperFile(host, "ips/ips-all-sorted.txt")
-	if err != nil {
-		return Target{}, err
-	}
+	ips, _ := readSniperFile(host, "ips/ips-all-sorted.txt")
 
 	result.Name = strings.Split(targets, "\n")[0]
 	result.IP = strings.Split(ips, "\n")[0]
 
-	return result, nil
+	return result
 }
 
 /* Get the start moment of the scan
