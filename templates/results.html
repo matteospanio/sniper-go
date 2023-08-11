@@ -12,14 +12,14 @@
         <div class="pb-3 mb-0 small lh-sm border-bottom w-100">
             <div class="d-flex justify-content-between">
                 <a class="link-underline-opacity-0 link-underline" href="/results/{{.host}}" target="_blank"><strong class="text-gray-dark" data-results-target="title">{{ .host }}:</strong></a>
-                <span href="#">Score: {{ .summary.score }}</span>
+                <span href="#">Score: {{ .summary.Score }}</span>
             </div>
             <p class="d-block">
-                <span class="badge rounded-pill text-bg-dark">Critical {{ .summary.critical }}</span>
-                <span class="badge rounded-pill text-bg-danger">High {{ .summary.high }}</span>
-                <span class="badge rounded-pill text-bg-warning">Medium {{ .summary.medium }}</span>
-                <span class="badge rounded-pill text-bg-info">Low {{ .summary.low }}</span>
-                <span class="badge rounded-pill text-bg-success">Info {{ .summary.info }}</span>
+                <span class="badge rounded-pill text-bg-dark">Critical {{ .summary.Critical }}</span>
+                <span class="badge rounded-pill text-bg-danger">High {{ .summary.High }}</span>
+                <span class="badge rounded-pill text-bg-warning">Medium {{ .summary.Medium }}</span>
+                <span class="badge rounded-pill text-bg-info">Low {{ .summary.Low }}</span>
+                <span class="badge rounded-pill text-bg-success">Info {{ .summary.Info }}</span>
             </p>
         </div>
     </div>
