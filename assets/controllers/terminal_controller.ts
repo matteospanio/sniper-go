@@ -2,7 +2,7 @@ import { Controller } from '@hotwired/stimulus'
 import { decode } from 'he';
 import { websocket } from '../ws';
 import ResultsController from './results_controller';
-import { parseFormatAnsi } from '../utils';
+import { parseAnsi, parseFormatAnsi } from '../utils';
 
 export default class extends Controller {
     static targets = ['input', 'output', 'btn']
@@ -33,7 +33,7 @@ export default class extends Controller {
             lines.shift()
             this.outputTarget.innerText = lines.join('\n')
         }
-        this.outputTarget.innerHTML += `${parseFormatAnsi(msg)}\n`
+        this.outputTarget.innerHTML += `${parseAnsi(msg)}\n`
         this.outputTarget.scrollTop = this.outputTarget.scrollHeight
     }
 

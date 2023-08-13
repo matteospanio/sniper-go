@@ -42,7 +42,6 @@ func handleWebSocket(c *gin.Context) {
 		go func() {
 			for scanner.Scan() {
 				line := scanner.Text()
-				fmt.Println(line)
 				conn.WriteMessage(websocket.TextMessage, []byte(html.EscapeString(line)))
 			}
 

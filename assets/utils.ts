@@ -1,8 +1,22 @@
-const ansiRegex2 = /\x1b\[([0-9a-z;]+)(;(\d+))*m/gi;
+import ansiRegex from 'ansi-regex';
+
+export function parseAnsi(str: string): string {
+    const regex = ansiRegex({onlyFirst: true})
+    let match = str.match(regex)
+    let content = str;
+    while (match !== null) {
+        const code = match[0]
+        content = content.replace(code, "")
+        match = str.match(regex)
+    }
+
+    return str
+}
+
 
 // replace ansi codes with bootstrap classes in span tags
 export function parseFormatAnsi(str: string): string {
-    let match = ansiRegex2.exec(str)
+    let match = str.match(ansiRegex())
     while (match !== null) {
         const code = match[1]
         const style = match[3]
@@ -70,7 +84,7 @@ export function parseFormatAnsi(str: string): string {
             }
             str = str.replace(match[0], `<span class="${className}">`)
         }
-        match = ansiRegex2.exec(str)
+        //match = ansiRegex.exec(str)
     }
     return str    
 }
