@@ -35,6 +35,12 @@ type Vulnerability struct {
 	References  []string `json:"references"`
 }
 
+type Task struct {
+	IsRunning bool      `json:"isRunning"`
+	Target    Target    `json:"target"`
+	Date      time.Time `json:"date"`
+}
+
 type Report struct {
 	Host            Target          `json:"host"`
 	Vulnerabilities []Vulnerability `json:"vulnerabilities"`
@@ -49,7 +55,10 @@ type Target struct {
 	IP   string `json:"ip"`
 }
 
-const sniper_report_path = "/usr/share/sniper/loot/workspace"
+const (
+	sniper_report_path = "/usr/share/sniper/loot/workspace"
+	sniper_out_path    = "/usr/share/sniper/loot/output"
+)
 
 /*
  * Create a report from the scan
@@ -288,4 +297,85 @@ func getResults(query string) ([]map[string]interface{}, error) {
 	}
 
 	return results, nil
+}
+
+func isRunning(host string) (bool, error) {
+	content, err := readSniperFile(host, "scans/tasks-running.txt")
+	if err != nil {
+		return false, err
+	}
+
+	isRunning, err := strconv.Atoi(strings.Split(content, "\n")[0])
+	if err != nil {
+		return false, err
+	}
+
+	return isRunning > 0, nil
+}
+
+func getTasks(query string) ([]map[string]interface{}, error) {
+	var results []map[string]interface{}
+
+	query = strings.Trim(query, " \t\n")
+
+	fileList, err := os.ReadDir(sniper_report_path)
+	if err != nil {
+		return results, err
+	}
+
+	for _, file := range fileList {
+		date, err := getDate(file.Name())
+		if err != nil {
+			return results, err
+		}
+
+		running, err := isRunning(file.Name())
+		if err != nil {
+			return results, err
+		}
+
+		tmp := map[string]interface{}{
+			"date":      date,
+			"host":      file.Name(),
+			"isRunning": running,
+		}
+
+		results = append(results, tmp)
+	}
+
+	sort.Slice(results, func(i, j int) bool {
+		return results[i]["date"].(time.Time).After(results[j]["date"].(time.Time))
+	})
+
+	if query != "" {
+		var filteredResults []map[string]interface{}
+		for _, result := range results {
+			if strings.Contains(result["host"].(string), query) {
+				filteredResults = append(filteredResults, result)
+			}
+		}
+		results = filteredResults
+	}
+
+	return results, nil
+}
+
+func getTask(id string) (Task, error) {
+	var result Task
+	result.Target = getTarget(id)
+
+	running, err := isRunning(id)
+	if err != nil {
+		return result, err
+	}
+
+	date, err := getDate(id)
+	if err != nil {
+		return result, err
+	}
+
+	result.IsRunning = running
+	result.Date = date
+
+	return result, nil
 }

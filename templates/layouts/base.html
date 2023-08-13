@@ -1,4 +1,3 @@
-{{define "base"}}
 <!DOCTYPE html>
 <html data-controller="theme" data-theme-theme-value="light" data-theme-icon-value="fa-moon" lang="en">
     <head>
@@ -10,10 +9,22 @@
         {{ end }}
     </head>
     <body >
-        {{ block "header" . }}{{end}}
+        {{ template "header" . }}
         <main class="d-flex">
-            {{ block "body" . }}Content{{ end }}
+            {{ template "body" . }}
         </main>
     </body>
 </html>
+
+{{define "header"}}
+<header>
+    <nav class="navbar bg-body-tertiary">
+    <div class="container-md">
+        <a class="navbar-brand" href="/">sniper-go</a>
+        <div class="d-flex">
+            <button data-action='theme#switchTheme' class="ms-2 btn btn-info "><i data-theme-target="icon" class="fa-solid"></i></button>
+        </div>
+    </div>
+    </nav>
+</header>
 {{end}}

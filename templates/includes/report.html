@@ -8,7 +8,15 @@
     <body>
         <h1>Report {{ if .report.Host.Name }} {{ .report.Host.Name }} {{ end}} {{ if .report.Host.IP }} : {{ .report.Host.IP }} {{end}}</h1>
         <div>
-            <h2>Summary</h2>
+            <div class="row">
+                <div class="col">
+                    <p>Host: {{.Host.Name}}</p>
+                </div>
+                <div class="col">
+                    <p>IP: {{.Host.IP}}</p>
+                </div>
+            </div>
+
             <table>
                 <tr>
                     <th>Critical</th>

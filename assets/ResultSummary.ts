@@ -1,5 +1,4 @@
 export interface ResultSummary {
-    host: string
     critical: number
     high: number
     medium: number

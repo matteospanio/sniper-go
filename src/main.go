@@ -11,16 +11,39 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"path/filepath"
 
+	"github.com/gin-contrib/multitemplate"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 )
 
-const (
-	results_template = "results.html"
-	report_template  = "report.html"
-	index_template   = "index.html"
-)
+func loadTemplates(templatesDir string) multitemplate.Renderer {
+	r := multitemplate.NewRenderer()
+
+	layouts, err := filepath.Glob(templatesDir + "/layouts/*.html")
+	if err != nil {
+		panic(err.Error())
+	}
+
+	includes, err := filepath.Glob(templatesDir + "/includes/*.html")
+	if err != nil {
+		panic(err.Error())
+	}
+
+	// Generate our templates map from our layouts/ and includes/ directories
+	for _, include := range includes {
+		layoutCopy := make([]string, len(layouts))
+		copy(layoutCopy, layouts)
+		files := append(layoutCopy, include)
+		r.AddFromFiles(filepath.Base(include), files...)
+	}
+
+	r.AddFromFiles("results.html", templatesDir+"/results.html")
+	r.AddFromFiles("tasks.html", templatesDir+"/tasks.html")
+
+	return r
+}
 
 var wsupgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
@@ -36,12 +59,7 @@ func main() {
 	}
 
 	router := gin.Default()
-
-	templates, err := ParseTemplateDir("templates")
-	if err != nil {
-		panic("Failed to load templates: " + err.Error())
-	}
-	router.SetHTMLTemplate(templates)
+	router.HTMLRender = loadTemplates("./templates")
 	router.Static("/assets", "./dist")
 
 	router.NoRoute(func(c *gin.Context) {
@@ -65,12 +83,16 @@ func main() {
 	{
 		api.GET("/results", handleApiResults)
 		api.GET("/results/:hostName", handleApiSingleResult)
+		api.GET("/tasks", handleApiTasks)
+		api.GET("/tasks/:hostName", handleApiSingleTask)
 	}
 
 	router.GET("/results", handleResults)
 	router.GET("/results/:hostName", handleSingleResult)
+	router.GET("/tasks", handleTasks)
+	router.GET("/tasks/:id", handleSingleTask)
 
-	err = router.Run(fmt.Sprintf("0.0.0.0:%s", PORT))
+	err := router.Run(fmt.Sprintf("0.0.0.0:%s", PORT))
 	if err != nil {
 		fmt.Println(err.Error())
 		return

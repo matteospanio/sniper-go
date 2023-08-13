@@ -13,6 +13,14 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+const (
+	results_template = "results.html"
+	result_template  = "result.html"
+	report_template  = "report.html"
+	index_template   = "index.html"
+	tasks_template   = "tasks.html"
+)
+
 func handleWebSocket(c *gin.Context) {
 	conn, err := wsupgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
@@ -33,12 +41,12 @@ func handleWebSocket(c *gin.Context) {
 		if command == "exit" {
 			break
 		}
+		os.Remove("/tmp/sniper.log")
 		command += " > /tmp/sniper.log"
 		cmd := exec.Command("bash", "-c", command)
 
 		cmd.Start()
 
-		// open /tmp/sniper.log
 		file, _ := os.Open("/tmp/sniper.log")
 		defer file.Close()
 
@@ -96,6 +104,55 @@ func handleSingleResult(c *gin.Context) {
 	host := c.Param("hostName")
 
 	report, err := createReport(host)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.HTML(http.StatusOK, result_template, gin.H{
+		"title":  "Report for " + host,
+		"report": report,
+	})
+}
+
+func handleApiTasks(c *gin.Context) {
+	query := strings.Trim(c.Query("q"), " \t\n")
+	tasks, err := getTasks(query)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.HTML(http.StatusOK, tasks_template, gin.H{"tasks": tasks})
+}
+
+func handleTasks(c *gin.Context) {
+	query := c.Query("query")
+	tasks, err := getTasks(query)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	}
+
+	c.HTML(http.StatusOK, tasks_template, gin.H{
+		"tasks": tasks,
+	})
+}
+
+func handleApiSingleTask(c *gin.Context) {
+	host := c.Param("hostName")
+	task, err := getTask(host)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"data": task})
+}
+
+func handleSingleTask(c *gin.Context) {
+	// TODO
+	host := c.Param("id")
+
+	report, err := getTask(host)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return

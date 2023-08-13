@@ -1,0 +1,68 @@
+{{define "body"}}
+<div class="container-md pt-5">
+    <h1>Report {{ if .report.Host.Name }}{{ .report.Host.Name }}{{ end}}{{ if .report.Host.IP }}@{{ .report.Host.IP }}{{end}}</h1>
+    <div>
+        <div class="row">
+            <div class="col">
+                <p>Host: {{.report.Host.Name}}</p>
+            </div>
+            <div class="col">
+                <p>IP: {{.report.Host.IP}}</p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <p>Scan started: {{.report.Date}}</p>
+            </div>
+            <div class="col">
+                <p>Reccurrent: No</p><!-- TODO -->
+            </div>
+        <div class="row limited-height">
+            <h2>Summary</h2>
+            <div class="col"/>
+                <table>
+                    <tr>
+                        <th>Critical</th>
+                        <td>{{ .report.Summary.Critical }}</td>
+                    </tr>
+                    <tr>
+                        <th>High</th>
+                        <td>{{ .report.Summary.High }}</td>
+                    </tr>
+                    <tr>
+                        <th>Medium</th>
+                        <td>{{ .report.Summary.Medium }}</td>
+                    </tr>
+                    <tr>
+                        <th>Low</th>
+                        <td>{{ .report.Summary.Low }}</td>
+                    </tr>
+                    <tr>
+                        <th>Info</th>
+                        <td>{{ .report.Summary.Info }}</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="col">
+                <canvas data-controller="piechart" data-piechart-host-value="{{if .report.Host.Name}}{{.report.Host.Name}}{{else}}{{.report.Host.IP}}{{end}}" id="pie-chart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    {{ template "screenshots" . }}
+
+    <ul>
+    {{ range .report.Vulnerabilities }}
+        <li>{{ .report.Name }}</li>
+    {{ end }}
+    </ul>
+</div>
+{{end}}
+
+{{ define "screenshots" }}
+{{ range .screens }}
+    <div>
+        <img src="{{ . }}" />
+    </div>
+{{ end }}
+{{ end }}

@@ -3,6 +3,7 @@ module github.com/matteospanio/sniper-go
 go 1.18
 
 require (
+	github.com/gin-contrib/multitemplate v0.0.0-20230212012517-45920c92c271
 	github.com/gin-gonic/gin v1.9.1
 	github.com/gorilla/websocket v1.5.0
 )

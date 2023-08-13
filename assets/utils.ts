@@ -1,3 +1,4 @@
+import { ResultSummary } from './ResultSummary';
 import ansiRegex from 'ansi-regex';
 
 export function parseAnsi(str: string): string {
@@ -13,6 +14,11 @@ export function parseAnsi(str: string): string {
     return str
 }
 
+export async function getData(host: string): Promise<ResultSummary> {
+    const result = await fetch(`/api/results/${host}`)
+    const jsonRes = await result.json()
+    return jsonRes.data.summary
+}
 
 // replace ansi codes with bootstrap classes in span tags
 export function parseFormatAnsi(str: string): string {
