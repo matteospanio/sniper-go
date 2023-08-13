@@ -7,7 +7,7 @@ export function parseAnsi(str: string): string {
     while (match !== null) {
         const code = match[0]
         content = content.replace(code, "")
-        match = str.match(regex)
+        match = content.match(regex)
     }
 
     return str
