@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"html"
 	"net/http"
+	"os"
 	"os/exec"
 	"strings"
 
@@ -32,12 +33,16 @@ func handleWebSocket(c *gin.Context) {
 		if command == "exit" {
 			break
 		}
+		command += " > /tmp/sniper.log"
 		cmd := exec.Command("bash", "-c", command)
 
-		stdout, _ := cmd.StdoutPipe()
 		cmd.Start()
 
-		scanner := bufio.NewScanner(stdout)
+		// open /tmp/sniper.log
+		file, _ := os.Open("/tmp/sniper.log")
+		defer file.Close()
+
+		scanner := bufio.NewScanner(file)
 
 		go func() {
 			for scanner.Scan() {
