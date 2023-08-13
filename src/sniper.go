@@ -8,6 +8,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"regexp"
@@ -259,6 +260,10 @@ func getResults(query string) ([]map[string]interface{}, error) {
 	for _, file := range fileList {
 		report, err := readSummaryFile(file.Name())
 		if err != nil {
+			if errors.Is(err, os.ErrNotExist) {
+				continue
+			}
+
 			return results, err
 		}
 
