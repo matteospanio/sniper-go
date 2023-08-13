@@ -1,7 +1,6 @@
 import { Controller } from "@hotwired/stimulus";
 import { Chart } from "chart.js/auto";
 import { getData } from "../utils";
-import { ResultSummary } from "../ResultSummary";
 
 export default class extends Controller<HTMLCanvasElement> {
     static values = { host: String }
@@ -29,6 +28,9 @@ export default class extends Controller<HTMLCanvasElement> {
                             data: [data.critical, data.high, data.medium, data.low, data.info],
                         }]
                     },
+                    options: {
+                        maintainAspectRatio: false,
+                    }
                 })
             })
             .catch(err => console.log(err))

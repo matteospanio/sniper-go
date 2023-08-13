@@ -25,7 +25,6 @@ export default class extends Controller<HTMLElement> {
         fetch(`/tasks?query=${query}`)
             .then(response => response.text())
             .then(data => {
-                console.log(data)
                 this.outputTarget.innerHTML = data
             })
             .catch(error => console.error(error))

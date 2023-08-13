@@ -28,11 +28,9 @@ type ReportSummary struct {
 }
 
 type Vulnerability struct {
-	Name        string   `json:"name"`
-	Severity    string   `json:"severity"`
-	Description string   `json:"description"`
-	Remediation string   `json:"remediation"`
-	References  []string `json:"references"`
+	Severity    string `json:"severity"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
 }
 
 type Task struct {
@@ -84,6 +82,12 @@ func createReport(host string) (Report, error) {
 		return Report{}, err
 	}
 	result.Summary = summary
+
+	vuln, err := getDetails(host)
+	if err != nil {
+		return result, err
+	}
+	result.Vulnerabilities = vuln
 
 	result.Screens = getScreenshots(host)
 
@@ -199,38 +203,28 @@ func getScreenshots(host string) []string {
 func getDetails(host string) ([]Vulnerability, error) {
 	var result []Vulnerability
 
-	content, err := readSniperFile(host, fmt.Sprintf("vulnerabilities/vulnerability-report-%s.txt", host))
+	content, err := readSniperFile(host, "vulnerabilities/sc0pe-all-vulnerabilities-sorted.txt")
 	if err != nil {
-		return []Vulnerability{}, err
+		return result, err
 	}
 
-	// skip first 10 lines of content
-	lines := strings.Split(content, "\n")[10:]
+	lines := strings.Split(content, "\n")
 	for _, line := range lines {
 		if line == "" {
 			continue
 		}
 
-		// parse line
-		re := regexp.MustCompile(`(\w+) (.*)`)
-		matches := re.FindStringSubmatch(line)
-		if len(matches) < 3 || matches == nil {
-			return []Vulnerability{}, fmt.Errorf("regxep: no matches for %s", host)
-		}
+		splittedLine := strings.SplitN(line, ",", 3)
 
-		// parse references
-		references := strings.Split(matches[2], ", ")
-		for i := range references {
-			references[i] = strings.TrimSpace(references[i])
-		}
+		severity := strings.Split(splittedLine[0], "-")[1]
+		name := splittedLine[1]
+		description := splittedLine[2]
 
 		// append to result
 		result = append(result, Vulnerability{
-			Name:        matches[1],
-			Severity:    matches[1],
-			Description: matches[2],
-			Remediation: "",
-			References:  references,
+			Severity:    severity,
+			Name:        name,
+			Description: description,
 		})
 	}
 
