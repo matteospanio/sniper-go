@@ -87,6 +87,12 @@ func main() {
 		PORT = "8080"
 	}
 
+	err := os.MkdirAll(screensPath, os.ModePerm)
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+
 	router := gin.Default()
 	router.HTMLRender = loadTemplates(templatesPath)
 	router.Static("/assets", distPath)
@@ -122,7 +128,7 @@ func main() {
 	router.GET("/tasks", handleTasks)
 	router.GET("/tasks/:id", handleSingleTask)
 
-	err := router.Run(fmt.Sprintf("0.0.0.0:%s", PORT))
+	err = router.Run(fmt.Sprintf("0.0.0.0:%s", PORT))
 	if err != nil {
 		fmt.Println(err.Error())
 		return

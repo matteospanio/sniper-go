@@ -104,6 +104,7 @@ func createReport(host string) (Report, error) {
 	result.Vulnerabilities = vuln
 
 	result.Screens = getScreenshots(host)
+	fmt.Println(result.Screens)
 
 	return result, nil
 }
@@ -254,7 +255,7 @@ func getScreenshots(host string) []string {
 		src := fmt.Sprintf("%s/%s/screenshots/%s", sniperReportPath, host, file.Name())
 		dst := fmt.Sprintf("./screens/%s/%s", host, file.Name())
 
-		err := os.Link(src, dst)
+		err := copyFile(src, dst)
 		if err != nil {
 			return result
 		}

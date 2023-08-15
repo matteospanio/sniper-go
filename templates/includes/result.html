@@ -75,6 +75,7 @@
     {{ if .report.History }}
         {{ template "history" . }}
     {{ end }}
+    <p>[DEBUG] screenshots {{ .report.Screens | print }}</p>
     {{ if .report.Screens }}
         {{ template "screenshots" . }}
     {{ end }}
