@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"html"
 	"net/http"
-	"os"
 	"os/exec"
 	"strings"
 
@@ -27,7 +26,13 @@ func handleWebSocket(c *gin.Context) {
 		fmt.Println("Failed to set websocket upgrade: ", err)
 		return
 	}
-	defer conn.Close()
+
+	defer func() {
+		conn.Close()
+		delete(connections, conn)
+	}()
+
+	connections[conn] = true
 
 	for {
 		_, msg, err := conn.ReadMessage()
@@ -36,37 +41,42 @@ func handleWebSocket(c *gin.Context) {
 			return
 		}
 
-		fmt.Printf("Processing: %s\n", msg)
-		command := string(msg)
-		if command == "exit" {
-			break
-		}
-		os.Remove("/tmp/sniper.log")
+		target := string(msg)
 
-		command += " > /tmp/sniper.log"
-		cmd := exec.Command("bash", "-c", command)
+		cmd := exec.Command("bash", "-c", "sniper -t "+target)
+		fmt.Println("Running: ", cmd.String())
+
+		stdout, err := cmd.StdoutPipe()
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
 
 		cmd.Start()
-
-		file, _ := os.Open("/tmp/sniper.log")
-		defer file.Close()
-
-		scanner := bufio.NewScanner(file)
+		scanner := bufio.NewScanner(stdout)
 
 		go func() {
 			for scanner.Scan() {
 				line := scanner.Text()
-				conn.WriteMessage(websocket.TextMessage, []byte(html.EscapeString(line)))
-			}
 
-			conn.WriteMessage(websocket.TextMessage, []byte("[DONE]"))
-			fmt.Println("[DONE]")
+				for conn := range connections {
+					conn.WriteMessage(websocket.TextMessage, []byte(html.EscapeString(line)))
+				}
+			}
 		}()
 
 		err = cmd.Wait()
 		if err != nil {
 			return
 		}
+
+		for conn := range connections {
+			if err := conn.WriteMessage(websocket.TextMessage, []byte("[DONE]")); err != nil {
+				fmt.Println("Failed to send message to client:", err)
+			}
+		}
+
+		fmt.Println("[DONE]")
 	}
 }
 
@@ -91,6 +101,7 @@ func handleResults(c *gin.Context) {
 
 	c.HTML(http.StatusOK, resultsTemplate, gin.H{
 		"results": results,
+		"section": "Results",
 	})
 }
 
@@ -127,7 +138,7 @@ func handleApiTasks(c *gin.Context) {
 		return
 	}
 
-	c.HTML(http.StatusOK, tasksTemplate, gin.H{"tasks": tasks})
+	c.JSON(http.StatusOK, gin.H{"tasks": tasks})
 }
 
 func handleTasks(c *gin.Context) {
@@ -138,7 +149,8 @@ func handleTasks(c *gin.Context) {
 	}
 
 	c.HTML(http.StatusOK, tasksTemplate, gin.H{
-		"tasks": tasks,
+		"section": "Tasks",
+		"tasks":   tasks,
 	})
 }
 

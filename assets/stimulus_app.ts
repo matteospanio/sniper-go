@@ -7,7 +7,9 @@ declare global {
     }
 }
 
-window.Stimulus = Application.start()
+const application = Application.start()
+application.debug = false
+window.Stimulus = application
 // @ts-ignore
 const context = require.context("./controllers", true, /\.ts$/);
 window.Stimulus.load(definitionsFromContext(context));

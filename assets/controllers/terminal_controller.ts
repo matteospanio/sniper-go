@@ -1,28 +1,27 @@
 import { Controller } from '@hotwired/stimulus'
 import { decode } from 'he';
 import { websocket } from '../ws';
-import ResultsController from './list_controller';
-import { parseAnsi, parseFormatAnsi } from '../utils';
+import ListController from './list_controller';
+import { parseAnsi } from '../utils';
 
 export default class extends Controller {
-    static targets = ['input', 'output', 'btn']
-    static outlets = ['results']
-    
-    declare readonly btnTarget: HTMLButtonElement
+    static targets = ['input', 'output']
+    static outlets = ['list']
+
     declare readonly inputTarget: HTMLInputElement
     declare readonly outputTarget: HTMLInputElement
-    declare readonly resultsOutlet: ResultsController
+    declare readonly listOutlets: ListController[]
+
 
     connect() {
         websocket.onmessage = (msg) => {
             const data = msg.data
-            console.log(data)
+            console.log(parseAnsi(decode(data)))
             if (data === "[DONE]") {
                 this.inputTarget.value = ''
-                this.resultsOutlet.load()
-                this.btnTarget.disabled = false
-            } else {
-                this.writeOutput(decode(data))
+                this.loadOutlets()
+            // } else {
+            //     this.writeOutput(decode(data))
             }
         }
     }
@@ -39,8 +38,12 @@ export default class extends Controller {
 
     sendInput() {
         const data = this.inputTarget.value
-        this.btnTarget.disabled = true
-        this.outputTarget.innerText += `\n~ ${data}\n`
+        // this.outputTarget.innerText += `\n~ ${data}\n`
         websocket.send(data)
+        setTimeout(() => this.loadOutlets(), 5000)
+    }
+
+    private loadOutlets() {
+        this.listOutlets.forEach((outlet) => outlet.load())
     }
 }

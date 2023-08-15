@@ -26,12 +26,12 @@ export default class extends Controller<HTMLElement> {
         this.iconTarget.classList.add(this.iconValue)
     }
 
-    getOldIcon() {
-        return this.iconValue === 'light' ? 'fa-sun' : 'fa-moon'
-    }
-
     switchTheme() {
         this.themeValue = this.themeValue === 'light' ? 'dark' : 'light'
         this.iconValue = this.themeValue === 'light' ? 'fa-moon' : 'fa-sun'
+    }
+
+    private getOldIcon() {
+        return this.iconValue === 'light' ? 'fa-sun' : 'fa-moon'
     }
 }

@@ -9,10 +9,6 @@ export default class extends Controller<HTMLElement> {
     declare readonly inputTarget: HTMLInputElement
     declare readonly outputTarget: HTMLInputElement
 
-    connect() {
-        this.load()
-    }
-
     queryValueChanged() {
         this.load(this.queryValue)
     }

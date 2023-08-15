@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html data-controller="theme" data-theme-theme-value="light" data-theme-icon-value="fa-moon" lang="en">
+<html lang="en">
     <head>
         <title>{{ .title }}</title>
         <meta charset="UTF-8">
@@ -8,9 +8,9 @@
             <script src="/assets/app.js"></script>
         {{ end }}
     </head>
-    <body >
+    <body data-controller="theme" data-theme-theme-value="light" data-theme-icon-value="fa-moon">
         {{ template "header" . }}
-        <main class="d-flex">
+        <main>
             {{ template "body" . }}
         </main>
     </body>

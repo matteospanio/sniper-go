@@ -46,12 +46,19 @@ type Report struct {
 	Summary         ReportSummary   `json:"summary"`
 	Date            time.Time       `json:"date"`
 	Screens         []string        `json:"screens"`
+	History         []Scan          `json:"history"`
+}
+
+type Scan struct {
+	Date   time.Time `json:"date"`
+	Job    string    `json:"scan"`
+	Target string    `json:"target"`
 }
 
 // Target name and IP address
 type Target struct {
-	Name string `json:"name"`
-	IP   string `json:"ip"`
+	Name string   `json:"name"`
+	IP   []string `json:"ip"`
 }
 
 const (
@@ -66,7 +73,7 @@ const (
 func createReport(host string) (Report, error) {
 	var result Report
 
-	date, err := getDate(host)
+	date, err := getLastScan(host)
 	if err != nil {
 		return Report{}, err
 	}
@@ -83,6 +90,12 @@ func createReport(host string) (Report, error) {
 		return Report{}, err
 	}
 	result.Summary = summary
+
+	history, err := getHistory(host)
+	if err != nil {
+		return Report{}, err
+	}
+	result.History = history
 
 	vuln, err := getDetails(host)
 	if err != nil {
@@ -128,6 +141,41 @@ func readSummaryFile(host string) (ReportSummary, error) {
 
 }
 
+func getHistory(host string) ([]Scan, error) {
+	var result []Scan
+
+	scans, err := readSniperFile(host, "scans/tasks.txt")
+	if err != nil {
+		return result, err
+	}
+
+	scanList := strings.Split(scans, "\n")
+	for _, scan := range scanList {
+		if scan == "" {
+			continue
+		}
+
+		splitted := strings.SplitN(scan, " ", 3)
+
+		if len(splitted) < 3 {
+			return result, errors.New("error parsing scan history for host " + host)
+		}
+
+		date, err := time.Parse("2006-01-02 15:04", splitted[2])
+		if err != nil {
+			return result, err
+		}
+
+		result = append(result, Scan{
+			Date:   date,
+			Job:    splitted[1],
+			Target: splitted[0],
+		})
+	}
+
+	return result, nil
+}
+
 /* Read the vulnerability report from sn1per
  * Return the content of the domains/targets-all-sorted.txt file
  * and the content of the ips/ips-all-sorted.txt file
@@ -136,10 +184,10 @@ func getTarget(host string) Target {
 	result := Target{}
 	if isIP(host) {
 		result.Name = ""
-		result.IP = host
+		result.IP = append(result.IP, host)
 	} else {
 		result.Name = host
-		result.IP = ""
+		result.IP = append(result.IP, "")
 	}
 
 	// find the host name
@@ -149,7 +197,15 @@ func getTarget(host string) Target {
 	ips, _ := readSniperFile(host, "ips/ips-all-sorted.txt")
 
 	result.Name = strings.Split(targets, "\n")[0]
-	result.IP = strings.Split(ips, "\n")[0]
+
+	for _, ip := range strings.Split(ips, "\n") {
+		fmt.Println(ip)
+		if !isEmpty(ip) {
+			result.IP = append(result.IP, ip)
+		}
+	}
+
+	fmt.Println(result.IP)
 
 	return result
 }
@@ -157,7 +213,7 @@ func getTarget(host string) Target {
 /* Get the start moment of the scan
  * Return the date from the scans/tasks.txt file
  */
-func getDate(host string) (time.Time, error) {
+func getLastScan(host string) (time.Time, error) {
 
 	content, err := readSniperFile(host, "scans/tasks.txt")
 	if err != nil {
@@ -197,10 +253,12 @@ func getScreenshots(host string) []string {
 	for _, file := range files {
 		src := fmt.Sprintf("%s/%s/screenshots/%s", sniperReportPath, host, file.Name())
 		dst := fmt.Sprintf("./screens/%s/%s", host, file.Name())
+
 		err := os.Link(src, dst)
 		if err != nil {
 			return result
 		}
+
 		result = append(result, fmt.Sprintf("/screens/%s/%s", host, file.Name()))
 	}
 
@@ -273,7 +331,7 @@ func getResults(query string) ([]map[string]interface{}, error) {
 			return results, err
 		}
 
-		date, err := getDate(file.Name())
+		date, err := getLastScan(file.Name())
 		if err != nil {
 			return results, err
 		}
@@ -329,7 +387,7 @@ func getTasks(query string) ([]map[string]interface{}, error) {
 	}
 
 	for _, file := range fileList {
-		date, err := getDate(file.Name())
+		date, err := getLastScan(file.Name())
 		if err != nil {
 			return results, err
 		}
@@ -374,7 +432,7 @@ func getTask(id string) (Task, error) {
 		return result, err
 	}
 
-	date, err := getDate(id)
+	date, err := getLastScan(id)
 	if err != nil {
 		return result, err
 	}

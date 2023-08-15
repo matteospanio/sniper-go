@@ -6,7 +6,7 @@
             <p>Host: {{.report.Host.Name}}</p>
         </div>
         <div class="col-sm-6">
-            <p>IP: {{.report.Host.IP}}</p>
+            <p>IP: {{ range .report.Host.IP }}{{.}}, {{end}}</p>
         </div>
     </div>
     <div class="row">
@@ -49,6 +49,7 @@
     </div>
 
     <div class="row" data-controller="vulntable">
+        <h2>Vulnerabilities</h2>
         <div class="card p-3 my-3">
             <table class="table table-striped table-hover" style="width:100%" data-vulntable-target="output">
                 <thead>
@@ -71,15 +72,30 @@
         </div>
     </div>
 
-    {{ template "screenshots" . }}
+    {{ if .report.History }}
+        {{ template "history" . }}
+    {{ end }}
+    {{ if .report.Screens }}
+        {{ template "screenshots" . }}
+    {{ end }}
 
 </div>
 {{end}}
 
-{{ define "screenshots" }}
-{{ range .report.Screens }}
+{{ define "history" }}
     <div>
-        <img src="{{ . }}" />
+        <h2>Scans History</h2>
+        {{ range .report.History }}
+            <p>{{ .Date }} - {{ .Target }} - {{ .Job }}</p>
+        {{ end }}
     </div>
 {{ end }}
+
+{{ define "screenshots" }}
+    <div>
+        <h2>Screenshots</h2>
+        {{ range .report.Screens }}
+            <img src="{{ . }}" />
+        {{ end }}
+    </div>
 {{ end }}

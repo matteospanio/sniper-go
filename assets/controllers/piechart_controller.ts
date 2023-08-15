@@ -11,7 +11,7 @@ export default class extends Controller<HTMLCanvasElement> {
         this.renderChart()
     }
 
-    renderChart(): void {
+    private renderChart(): void {
         getData(this.hostValue).then((data) => {
                 new Chart(this.element, {
                     type: 'pie',

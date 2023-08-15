@@ -9,9 +9,11 @@ package main
 
 import (
 	"fmt"
+	"html/template"
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/gin-contrib/multitemplate"
 	"github.com/gin-gonic/gin"
@@ -20,6 +22,18 @@ import (
 
 func loadTemplates(templatesDir string) multitemplate.Renderer {
 	r := multitemplate.NewRenderer()
+
+	functions := template.FuncMap{
+		"upper": func(str string) string {
+			return strings.ToUpper(str)
+		},
+		"lower": func(str string) string {
+			return strings.ToLower(str)
+		},
+		"capitalize": func(str string) string {
+			return strings.Title(str)
+		},
+	}
 
 	layouts, err := filepath.Glob(templatesDir + "/layouts/*.html")
 	if err != nil {
@@ -31,25 +45,34 @@ func loadTemplates(templatesDir string) multitemplate.Renderer {
 		panic(err.Error())
 	}
 
+	components, err := filepath.Glob(templatesDir + "/components/*.html")
+	if err != nil {
+		panic(err.Error())
+	}
+
 	// Generate our templates map from our layouts/ and includes/ directories
 	for _, include := range includes {
 		layoutCopy := make([]string, len(layouts))
 		copy(layoutCopy, layouts)
 		files := append(layoutCopy, include)
-		r.AddFromFiles(filepath.Base(include), files...)
+		r.AddFromFilesFuncs(filepath.Base(include), functions, files...)
 	}
 
-	r.AddFromFiles("results.html", templatesDir+"/results.html")
-	r.AddFromFiles("tasks.html", templatesDir+"/tasks.html")
+	for _, component := range components {
+		r.AddFromFilesFuncs(filepath.Base(component), functions, component)
+	}
 
 	return r
 }
 
-var wsupgrader = websocket.Upgrader{
-	ReadBufferSize:  1024,
-	WriteBufferSize: 1024,
-	CheckOrigin:     func(r *http.Request) bool { return true },
-}
+var (
+	wsupgrader = websocket.Upgrader{
+		ReadBufferSize:  1024,
+		WriteBufferSize: 1024,
+		CheckOrigin:     func(r *http.Request) bool { return true },
+	}
+	connections = make(map[*websocket.Conn]bool)
+)
 
 const (
 	distPath      = "./dist"

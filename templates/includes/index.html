@@ -1,12 +1,12 @@
 {{define "body"}}
-<div class="p-5 container-md mb-3" data-terminal-results-outlet="#results" data-controller="terminal">
+<div class="p-5 container-md mb-3" data-terminal-list-outlet=".listable" data-controller="terminal">
     <div class="row">
         <div class="input-group">
             <input type="text" class="form-control"  id="input" data-terminal-target='input' placeholder="type an IP address or host name" aria-label="target host" aria-describedby="btn">
             <button data-terminal-target="btn" data-action='click->terminal#sendInput' id="btn" class="btn btn-primary" type="button">Snipe!</button>
         </div>
     </div>
-    <div class="my-3 row justify-content-center">
+    {{- /* <div class="my-3 row justify-content-center">
         <div style="max-height:350px !important;" class="overflow-auto col-lg-10 rounded text-bg-dark">
             <pre>
                 <code class="text-light px-1 m-0" data-terminal-target="output">
@@ -15,9 +15,9 @@ root
                 </code>
             </pre>
         </div>
-    </div>
+    </div> */ -}}
     <div class="row mt-5">
-        <div data-controller="list" data-list-url-value="/tasks" id="tasks">
+        <div data-controller="list" data-list-url-value="/tasks" class="listable">
             <div class="my-3 p-3 bg-body rounded shadow-sm">
                 <div class="d-flex justify-content-between">
                     <h2 class="border-bottom pb-2 mb-0">Tasks</h2>
@@ -31,7 +31,7 @@ root
         </div>
     </div>
     <div class="row">
-        <div data-controller="list" data-list-url-value="/results" id="results">
+        <div data-controller="list" data-list-url-value="/results" class="listable">
             <div class="my-3 p-3 bg-body rounded shadow-sm">
                 <div class="d-flex justify-content-between">
                     <h2 class="border-bottom pb-2 mb-0">Results</h2>
