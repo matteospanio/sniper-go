@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -95,7 +96,7 @@ func handleScreenshots(c *gin.Context) {
 	host := c.Param("host")
 	filename := c.Param("filename")
 
-	c.File(sniperReportPath + "/" + host + "/" + filename)
+	c.File(filepath.Join(sniperReportPath, host, "screenshots", filename))
 }
 
 func handleApiResults(c *gin.Context) {
