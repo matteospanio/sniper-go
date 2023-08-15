@@ -18,7 +18,7 @@ import (
 	"time"
 )
 
-// The vulnerability report from sn1per
+// ReportSummary The vulnerability report from sn1per
 type ReportSummary struct {
 	Critical int `json:"critical"`
 	High     int `json:"high"`
@@ -48,15 +48,15 @@ type Report struct {
 	Screens         []string        `json:"screens"`
 }
 
-// Target's name and IP address
+// Target name and IP address
 type Target struct {
 	Name string `json:"name"`
 	IP   string `json:"ip"`
 }
 
 const (
-	sniper_report_path = "/usr/share/sniper/loot/workspace"
-	sniper_out_path    = "/usr/share/sniper/loot/output"
+	sniperReportPath = "/usr/share/sniper/loot/workspace"
+	sniperOutPath    = "/usr/share/sniper/loot/output"
 )
 
 /*
@@ -187,7 +187,7 @@ func getScreenshots(host string) []string {
 	files, err := os.ReadDir(
 		fmt.Sprintf(
 			"%s/%s/screenshots",
-			sniper_report_path,
+			sniperReportPath,
 			host,
 		))
 	if err != nil {
@@ -236,7 +236,7 @@ func readSniperFile(host string, filePath string) (string, error) {
 	content, err := os.ReadFile(
 		fmt.Sprintf(
 			"%s/%s/%s",
-			sniper_report_path,
+			sniperReportPath,
 			host,
 			filePath,
 		))
@@ -252,7 +252,7 @@ func getResults(query string) ([]map[string]interface{}, error) {
 
 	query = strings.Trim(query, " \t\n")
 
-	fileList, err := os.ReadDir(sniper_report_path)
+	fileList, err := os.ReadDir(sniperReportPath)
 	if err != nil {
 		return results, err
 	}
@@ -317,7 +317,7 @@ func getTasks(query string) ([]map[string]interface{}, error) {
 
 	query = strings.Trim(query, " \t\n")
 
-	fileList, err := os.ReadDir(sniper_report_path)
+	fileList, err := os.ReadDir(sniperReportPath)
 	if err != nil {
 		return results, err
 	}

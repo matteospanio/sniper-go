@@ -1,7 +1,7 @@
 import { Controller } from '@hotwired/stimulus'
 import { decode } from 'he';
 import { websocket } from '../ws';
-import ResultsController from './results_controller';
+import ResultsController from './list_controller';
 import { parseAnsi, parseFormatAnsi } from '../utils';
 
 export default class extends Controller {

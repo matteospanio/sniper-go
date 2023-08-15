@@ -14,11 +14,11 @@ import (
 )
 
 const (
-	results_template = "results.html"
-	result_template  = "result.html"
-	report_template  = "report.html"
-	index_template   = "index.html"
-	tasks_template   = "tasks.html"
+	resultsTemplate = "results.html"
+	resultTemplate  = "result.html"
+	reportTemplate  = "report.html"
+	indexTemplate   = "index.html"
+	tasksTemplate   = "tasks.html"
 )
 
 func handleWebSocket(c *gin.Context) {
@@ -42,6 +42,7 @@ func handleWebSocket(c *gin.Context) {
 			break
 		}
 		os.Remove("/tmp/sniper.log")
+
 		command += " > /tmp/sniper.log"
 		cmd := exec.Command("bash", "-c", command)
 
@@ -62,7 +63,10 @@ func handleWebSocket(c *gin.Context) {
 			fmt.Println("[DONE]")
 		}()
 
-		cmd.Wait()
+		err = cmd.Wait()
+		if err != nil {
+			return
+		}
 	}
 }
 
@@ -85,7 +89,7 @@ func handleResults(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 	}
 
-	c.HTML(http.StatusOK, results_template, gin.H{
+	c.HTML(http.StatusOK, resultsTemplate, gin.H{
 		"results": results,
 	})
 }
@@ -109,7 +113,7 @@ func handleSingleResult(c *gin.Context) {
 		return
 	}
 
-	c.HTML(http.StatusOK, result_template, gin.H{
+	c.HTML(http.StatusOK, resultTemplate, gin.H{
 		"title":  "Report for " + host,
 		"report": report,
 	})
@@ -123,7 +127,7 @@ func handleApiTasks(c *gin.Context) {
 		return
 	}
 
-	c.HTML(http.StatusOK, tasks_template, gin.H{"tasks": tasks})
+	c.HTML(http.StatusOK, tasksTemplate, gin.H{"tasks": tasks})
 }
 
 func handleTasks(c *gin.Context) {
@@ -133,7 +137,7 @@ func handleTasks(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 	}
 
-	c.HTML(http.StatusOK, tasks_template, gin.H{
+	c.HTML(http.StatusOK, tasksTemplate, gin.H{
 		"tasks": tasks,
 	})
 }
@@ -158,7 +162,7 @@ func handleSingleTask(c *gin.Context) {
 		return
 	}
 
-	c.HTML(http.StatusOK, report_template, gin.H{
+	c.HTML(http.StatusOK, reportTemplate, gin.H{
 		"report": report,
 	})
 }

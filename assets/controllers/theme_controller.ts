@@ -10,8 +10,6 @@ export default class extends Controller<HTMLElement> {
 
     declare themeValue: string
     declare iconValue: string
-    declare readonly hasThemeValue: boolean
-    declare readonly hasIconTarget: boolean
     declare readonly iconTarget: HTMLInputElement
 
     connect() {

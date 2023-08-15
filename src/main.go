@@ -70,7 +70,7 @@ func main() {
 	})
 
 	router.GET("/", func(c *gin.Context) {
-		c.HTML(http.StatusOK, index_template, gin.H{
+		c.HTML(http.StatusOK, indexTemplate, gin.H{
 			"title": "Sn1per web interface",
 		})
 	})
