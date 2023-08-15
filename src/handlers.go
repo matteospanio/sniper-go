@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"net/http"
 	"os/exec"
@@ -19,6 +18,27 @@ const (
 	indexTemplate   = "index.html"
 	tasksTemplate   = "tasks.html"
 )
+
+type Status struct {
+	Running bool
+}
+
+func printer(status *Status, start string, target string) {
+	for status.Running {
+		read := exec.Command("bash", "-c", "tail -n 50 "+sniperOutPath+"/sniper-"+target+"-"+start+".txt")
+		out, err := read.Output()
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
+
+		for conn := range connections {
+			conn.WriteMessage(websocket.TextMessage, out)
+		}
+
+		time.Sleep(1 * time.Second)
+	}
+}
 
 func handleWebSocket(c *gin.Context) {
 	conn, err := wsupgrader.Upgrade(c.Writer, c.Request, nil)
@@ -45,38 +65,29 @@ func handleWebSocket(c *gin.Context) {
 		cmd := exec.Command("bash", "-c", "sniper -t "+target)
 		fmt.Println("Running: ", cmd.String())
 
+		status := Status{Running: true}
+
 		date := time.Now().Format("2006-01-02-15-04")
 		date = strings.Replace(date, "-", "", -1)
 
-		stdout, err := cmd.StdoutPipe()
-		if err != nil {
-			fmt.Println(err)
-			continue
-		}
+		// stdout, err := cmd.StdoutPipe()
+		// if err != nil {
+		// 	fmt.Println(err)
+		// 	continue
+		// }
 
 		cmd.Start()
-		scanner := bufio.NewScanner(stdout)
+		// scanner := bufio.NewScanner(stdout)
 
-		go func() {
-			for scanner.Scan() {
-				read := exec.Command("bash", "-c", "tail -n 50 "+sniperOutPath+"/sniper-"+target+"-"+date+".txt")
-				out, err := read.Output()
-				if err != nil {
-					fmt.Println(err)
-					continue
-				}
-
-				for conn := range connections {
-					conn.WriteMessage(websocket.TextMessage, out)
-				}
-			}
-		}()
+		go printer(&status, date, target)
 
 		err = cmd.Wait()
 		if err != nil {
 			fmt.Println(err)
 			continue
 		}
+
+		status.Running = false
 
 		for conn := range connections {
 			if err := conn.WriteMessage(websocket.TextMessage, []byte("[DONE]")); err != nil {
