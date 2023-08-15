@@ -1,5 +1,4 @@
 import { Controller } from '@hotwired/stimulus'
-import { decode } from 'he';
 import { websocket } from '../ws';
 import ListController from './list_controller';
 import { parseAnsi } from '../utils';
@@ -16,7 +15,6 @@ export default class extends Controller {
     connect() {
         websocket.onmessage = (msg) => {
             const data = msg.data
-            console.log(parseAnsi(decode(data)))
             if (data === "[DONE]") {
                 this.inputTarget.value = ''
                 this.loadOutlets()

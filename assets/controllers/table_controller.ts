@@ -10,8 +10,10 @@ import { severityToBsClass } from '../ResultSummary';
 
 export default class extends Controller<HTMLElement> {
     static targets = ['output']
+    static values = { type: String }
 
     declare readonly outputTarget: HTMLTableElement
+    declare readonly typeValue: string
 
     connect() {
         new DataTable(this.outputTarget, {
@@ -23,7 +25,9 @@ export default class extends Controller<HTMLElement> {
                 {
                     targets: 0,
                     render: (data) => {
-                        return `<span class="badge bg-${severityToBsClass(data)}">${data}</span>`
+                        return this.typeValue === 'vuln'
+                            ? `<span class="badge bg-${severityToBsClass(data)}">${data}</span>`
+                            : data
                     }
                 },
             ],

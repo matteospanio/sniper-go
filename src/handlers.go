@@ -3,10 +3,10 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"html"
 	"net/http"
 	"os/exec"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
@@ -37,7 +37,6 @@ func handleWebSocket(c *gin.Context) {
 	for {
 		_, msg, err := conn.ReadMessage()
 		if err != nil {
-			fmt.Println(err)
 			return
 		}
 
@@ -46,10 +45,13 @@ func handleWebSocket(c *gin.Context) {
 		cmd := exec.Command("bash", "-c", "sniper -t "+target)
 		fmt.Println("Running: ", cmd.String())
 
+		date := time.Now().Format("2006-01-02-15-04")
+		date = strings.Replace(date, "-", "", -1)
+
 		stdout, err := cmd.StdoutPipe()
 		if err != nil {
 			fmt.Println(err)
-			return
+			continue
 		}
 
 		cmd.Start()
@@ -57,17 +59,23 @@ func handleWebSocket(c *gin.Context) {
 
 		go func() {
 			for scanner.Scan() {
-				line := scanner.Text()
+				read := exec.Command("bash", "-c", "tail -n 50 "+sniperOutPath+"/sniper-"+target+"-"+date+".txt")
+				out, err := read.Output()
+				if err != nil {
+					fmt.Println(err)
+					continue
+				}
 
 				for conn := range connections {
-					conn.WriteMessage(websocket.TextMessage, []byte(html.EscapeString(line)))
+					conn.WriteMessage(websocket.TextMessage, out)
 				}
 			}
 		}()
 
 		err = cmd.Wait()
 		if err != nil {
-			return
+			fmt.Println(err)
+			continue
 		}
 
 		for conn := range connections {

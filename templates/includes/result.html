@@ -14,7 +14,7 @@
             <p>Scan started: {{.report.Date}}</p>
         </div>
         <div class="col-sm-6">
-            <p>Reccurrent: No</p><!-- TODO -->
+            <p>Reccurrent: TODO</p><!-- TODO -->
         </div>
     </div>
     <div class="row">
@@ -48,10 +48,10 @@
         </div>
     </div>
 
-    <div class="row" data-controller="vulntable">
+    <div class="row" data-controller="table" data-table-type-value="vuln">
         <h2>Vulnerabilities</h2>
         <div class="card p-3 my-3">
-            <table class="table table-striped table-hover" style="width:100%" data-vulntable-target="output">
+            <table class="table table-striped table-hover" style="width:100%" data-table-target="output">
                 <thead>
                     <tr>
                         <th>Severity</th>
@@ -83,19 +83,36 @@
 {{end}}
 
 {{ define "history" }}
-    <div>
-        <h2>Scans History</h2>
-        {{ range .report.History }}
-            <p>{{ .Date }} - {{ .Target }} - {{ .Job }}</p>
-        {{ end }}
+<div class="row" data-controller="table" data-table-type-value="hist">
+    <h2>Scans History</h2>
+    <div class="card p-3 my-3">
+        <table class="table table-striped table-hover" data-table-target="output">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Target</th>
+                    <th>Job</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{ range .report.History }}
+                <tr>
+                    <td>{{ .Date }}</td>
+                    <td>{{ .Target }}</td>
+                    <td>{{ .Job }}</td>
+                </tr>
+                {{ end }}
+            </tbody>
+        </table>
     </div>
+</div>
 {{ end }}
 
 {{ define "screenshots" }}
-    <div>
-        <h2>Screenshots</h2>
-        {{ range .report.Screens }}
-            <img src="{{ . }}" />
-        {{ end }}
-    </div>
+<div>
+    <h2>Screenshots</h2>
+    {{ range .report.Screens }}
+        <img src="{{ . }}" />
+    {{ end }}
+</div>
 {{ end }}
