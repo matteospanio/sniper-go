@@ -195,7 +195,13 @@ func getScreenshots(host string) []string {
 	}
 
 	for _, file := range files {
-		result = append(result, file.Name())
+		src := fmt.Sprintf("%s/%s/screenshots/%s", sniperReportPath, host, file.Name())
+		dst := fmt.Sprintf("./screens/%s/%s", host, file.Name())
+		err := os.Link(src, dst)
+		if err != nil {
+			return result
+		}
+		result = append(result, fmt.Sprintf("/assets/screens/%s/%s", host, file.Name()))
 	}
 
 	return result

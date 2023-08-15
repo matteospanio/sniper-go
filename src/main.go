@@ -51,6 +51,12 @@ var wsupgrader = websocket.Upgrader{
 	CheckOrigin:     func(r *http.Request) bool { return true },
 }
 
+const (
+	distPath      = "./dist"
+	screensPath   = "./screens"
+	templatesPath = "./templates"
+)
+
 // GIN server
 func main() {
 	PORT, exists := os.LookupEnv("PORT")
@@ -59,8 +65,9 @@ func main() {
 	}
 
 	router := gin.Default()
-	router.HTMLRender = loadTemplates("./templates")
-	router.Static("/assets", "./dist")
+	router.HTMLRender = loadTemplates(templatesPath)
+	router.Static("/assets", distPath)
+	router.Static("/assets/screens", screensPath)
 
 	router.NoRoute(func(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Not found"})
