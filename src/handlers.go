@@ -25,7 +25,7 @@ type Status struct {
 
 func printer(status *Status, start string, target string) {
 	for status.Running {
-		read := exec.Command("bash", "-c", "tail -n 50 "+sniperOutPath+"/sniper-"+target+"-"+start+".txt")
+		read := exec.Command("bash", "-c", "tail -n 200 "+sniperOutPath+"/sniper-"+target+"-"+start+".txt")
 		out, err := read.Output()
 		if err != nil {
 			fmt.Println(err)
@@ -70,15 +70,7 @@ func handleWebSocket(c *gin.Context) {
 		date := time.Now().Format("2006-01-02-15-04")
 		date = strings.Replace(date, "-", "", -1)
 
-		// stdout, err := cmd.StdoutPipe()
-		// if err != nil {
-		// 	fmt.Println(err)
-		// 	continue
-		// }
-
 		cmd.Start()
-		// scanner := bufio.NewScanner(stdout)
-
 		go printer(&status, date, target)
 
 		err = cmd.Wait()

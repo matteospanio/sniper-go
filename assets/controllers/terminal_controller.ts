@@ -18,15 +18,15 @@ export default class extends Controller {
             if (data === "[DONE]") {
                 this.inputTarget.value = ''
                 this.loadOutlets()
-            // } else {
-            //     this.writeOutput(decode(data))
+            } else {
+                console.log(parseAnsi(data))
             }
         }
     }
 
     writeOutput(msg: string) {
         let lines = this.outputTarget.innerText.split('\n')
-        if (lines.length === 800) {
+        if (lines.length === 200) {
             lines.shift()
             this.outputTarget.innerText = lines.join('\n')
         }
