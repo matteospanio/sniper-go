@@ -11,5 +11,6 @@ dist
 # editor
 .idea
 
+screens
 data
 history
