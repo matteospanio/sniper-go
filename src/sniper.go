@@ -201,7 +201,7 @@ func getScreenshots(host string) []string {
 		if err != nil {
 			return result
 		}
-		result = append(result, fmt.Sprintf("/assets/screens/%s/%s", host, file.Name()))
+		result = append(result, fmt.Sprintf("/screens/%s/%s", host, file.Name()))
 	}
 
 	return result

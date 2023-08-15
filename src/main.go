@@ -67,7 +67,7 @@ func main() {
 	router := gin.Default()
 	router.HTMLRender = loadTemplates(templatesPath)
 	router.Static("/assets", distPath)
-	router.Static("/assets/screens", screensPath)
+	router.Static("/screens", screensPath)
 
 	router.NoRoute(func(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Not found"})
