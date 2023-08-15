@@ -91,6 +91,13 @@ func handleWebSocket(c *gin.Context) {
 	}
 }
 
+func handleScreenshots(c *gin.Context) {
+	host := c.Param("host")
+	filename := c.Param("filename")
+
+	c.File(sniperReportPath + "/" + host + "/" + filename)
+}
+
 func handleApiResults(c *gin.Context) {
 	query := strings.Trim(c.Query("q"), " \t\n")
 	results, err := getResults(query)

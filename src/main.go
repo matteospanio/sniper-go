@@ -87,16 +87,9 @@ func main() {
 		PORT = "8080"
 	}
 
-	err := os.MkdirAll(screensPath, os.ModePerm)
-	if err != nil {
-		fmt.Println(err.Error())
-		return
-	}
-
 	router := gin.Default()
 	router.HTMLRender = loadTemplates(templatesPath)
 	router.Static("/assets", distPath)
-	router.Static("/screens", screensPath)
 
 	router.NoRoute(func(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Not found"})
@@ -115,6 +108,8 @@ func main() {
 		handleWebSocket(c)
 	})
 
+	router.GET("/screens/:host/:filename", handleScreenshots)
+
 	api := router.Group("/api")
 	{
 		api.GET("/results", handleApiResults)
@@ -128,7 +123,7 @@ func main() {
 	router.GET("/tasks", handleTasks)
 	router.GET("/tasks/:id", handleSingleTask)
 
-	err = router.Run(fmt.Sprintf("0.0.0.0:%s", PORT))
+	err := router.Run(fmt.Sprintf("0.0.0.0:%s", PORT))
 	if err != nil {
 		fmt.Println(err.Error())
 		return
