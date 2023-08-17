@@ -57,7 +57,7 @@ type Scan struct {
 
 // Target name and IP address
 type Target struct {
-	Name string   `json:"name"`
+	Name []string `json:"name"`
 	IP   []string `json:"ip"`
 }
 
@@ -104,7 +104,6 @@ func createReport(host string) (Report, error) {
 	result.Vulnerabilities = vuln
 
 	result.Screens = getScreenshots(host)
-	fmt.Println(result.Screens)
 
 	return result, nil
 }
@@ -183,30 +182,22 @@ func getHistory(host string) ([]Scan, error) {
  */
 func getTarget(host string) Target {
 	result := Target{}
-	if isIP(host) {
-		result.Name = ""
-		result.IP = append(result.IP, host)
-	} else {
-		result.Name = host
-		result.IP = append(result.IP, "")
-	}
 
 	// find the host name
 	targets, _ := readSniperFile(host, "domains/targets-all-sorted.txt")
+	for _, target := range strings.Split(targets, "\n") {
+		if !isEmpty(target) {
+			result.Name = append(result.Name, target)
+		}
+	}
 
 	// find the host IP
 	ips, _ := readSniperFile(host, "ips/ips-all-sorted.txt")
-
-	result.Name = strings.Split(targets, "\n")[0]
-
 	for _, ip := range strings.Split(ips, "\n") {
-		fmt.Println(ip)
 		if !isEmpty(ip) {
 			result.IP = append(result.IP, ip)
 		}
 	}
-
-	fmt.Println(result.IP)
 
 	return result
 }

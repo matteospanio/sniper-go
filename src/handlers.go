@@ -30,6 +30,7 @@ func printer(status *Status, start string, target string) {
 		out, err := read.Output()
 		if err != nil {
 			fmt.Println(err)
+			time.Sleep(1 * time.Second)
 			continue
 		}
 
@@ -145,6 +146,7 @@ func handleSingleResult(c *gin.Context) {
 
 	c.HTML(http.StatusOK, resultTemplate, gin.H{
 		"title":  "Report for " + host,
+		"host":   host,
 		"report": report,
 	})
 }

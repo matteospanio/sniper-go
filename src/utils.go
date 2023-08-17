@@ -9,6 +9,7 @@ package main
 
 import (
 	"regexp"
+	"strings"
 )
 
 func isIP(s string) bool {
@@ -25,10 +26,6 @@ func isIP(s string) bool {
 }
 
 func isEmpty(s string) bool {
-	re, err := regexp.Compile(`^[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]*$`)
-	if err != nil {
-		panic(err)
-	}
-
-	return !re.MatchString(s)
+	trimmed := strings.TrimSpace(s)
+	return len(trimmed) == 0
 }

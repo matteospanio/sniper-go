@@ -19,7 +19,7 @@ export default class extends Controller<HTMLElement> {
         new DataTable(this.outputTarget, {
             dom: "<'card-header d-flex justify-content-between align-items-center'Bfr><'card-body't><'card-footer d-flex justify-content-between align-items-center' ip>",
             buttons: [
-                'pdf', 'excel', 'csv', 'print', 'copy'
+                'excel', 'csv', 'print', 'copy'
             ],
             columnDefs: [
                 {

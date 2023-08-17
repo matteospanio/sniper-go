@@ -1,6 +1,6 @@
 {{define "body"}}
 <div class="container-md pt-5">
-    <h1>{{ if .report.Host.Name }}{{ .report.Host.Name }}{{ else }}{{.report.Host.IP }}{{end}}</h1>
+    <h1>{{ .host }}</h1>
     <div class="row">
         <div class="col-sm-6">
             <p>Host: {{.report.Host.Name}}</p>
@@ -44,7 +44,7 @@
             </table>
         </div>
         <div class="col-sm-6">
-            <canvas data-controller="piechart" data-piechart-host-value="{{if .report.Host.Name}}{{.report.Host.Name}}{{else}}{{.report.Host.IP}}{{end}}" id="pie-chart"></canvas>
+            <canvas data-controller="piechart" data-piechart-host-value="{{ .host }}" id="pie-chart"></canvas>
         </div>
     </div>
 
