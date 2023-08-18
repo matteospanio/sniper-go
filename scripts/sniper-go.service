@@ -1,0 +1,13 @@
+# This is the sniper-go service
+
+[Unit]
+Description=sniper-go web server
+After=network.target
+Requires=postgresql.service
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/sniper-go
+Restart=always
+RestartSec=5s
+User=root

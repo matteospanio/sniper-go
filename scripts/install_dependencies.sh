@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 # install_dependencies.sh
 #
 # author: Matteo Spanio <dev2@audioinnova.com>
