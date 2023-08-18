@@ -4,8 +4,11 @@ A web interface for [Sn1per community edition](https://github.com/1N3/Sn1per).
 
 ## Features
 
-- Nice UI (thanks to [Bootstrap](https://getbootstrap.com/))
-- Scan reports (with download)
+- [X] Nice UI (thanks to [Bootstrap](https://getbootstrap.com/))
+- [X] Scan reports (with download)
+- [ ] Scan history (TODO)
+- [ ] Scan scheduling (TODO)
+- [ ] User management (TODO)
 
 ## Installation
 
@@ -57,3 +60,9 @@ You can install this software in two ways:
 - [Go](https://golang.org/)
 - [Yarn](https://yarnpkg.com/) (or npm)
 - [Make](https://www.gnu.org/software/make/)
+
+## Credits
+
+- The project is based on [Sn1per community edition](https://github.com/1N3/Sn1per)
+- The UI is based on [Bootstrap](https://getbootstrap.com/), [stimulus.js](https://stimulus.hotwired.dev/) and [Font Awesome](https://fontawesome.com/), and it is built with [webpack](https://webpack.js.org/).
+- The backend is written in [Go](https://golang.org/) and it uses [Gin](https://github.com/gin-gonic/gin).
