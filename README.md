@@ -24,11 +24,7 @@ Or you can install in your system, but you need to install the dependencies:
 After that, you can build the project:
 
 ```bash
-yarn build:dev
-```
-
-```bash
-make build
+make setup && make build
 ```
 
 ## Usage

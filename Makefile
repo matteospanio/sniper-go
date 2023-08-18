@@ -1,4 +1,5 @@
 GO = go
+YARN = yarn
 BINARY_NAME = sniper-go
 
 .PHONY: help build setup
@@ -10,7 +11,9 @@ help: ## Show this help
 	@echo "  setup: Setup the project"
 
 build: ## Build the binary file
+	$(YARN) build:dev
 	cd ./src && $(GO) build -o ../bin/$(BINARY_NAME) .
 
 setup: ## Setup the project
-	$(GO) get .
+	cd ./src && $(GO) get .
+	$(YARN) install
