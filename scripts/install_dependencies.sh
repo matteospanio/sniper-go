@@ -6,6 +6,24 @@
 
 source scripts/utils.sh
 
+function check_version {
+    # $1: command to check version
+    # $2: version to check
+    OUT=$($1 --version)
+    if [ $? -eq 0 ]; then
+        ok_log "$1 is already installed"
+        VERSION=$(echo $OUT | sed -E 's/^v([0-9]+)\.([0-9]+)\.([0-9]+)$/\1/')
+        if [ $VERSION -lt $2 ]; then
+            err_log "$1 version is less than $2, installing $1 $2"
+            return 1
+        else
+            return 0
+        fi
+    else
+        return 1
+    fi
+}
+
 check_root
 
 SNIPER_GO_DIR=$(pwd)
@@ -19,16 +37,14 @@ apt install -y curl git-all make
 
 # install git, node, npm
 
-OUT=$(node --version)
-# get node version major
-NODE_VERSION=$(echo $OUT | sed -E 's/^v([0-9]+)\.([0-9]+)\.([0-9]+)$/\1/')
-
+# check node version
+check_version "node" 16
 # if node version is less than 16, install node 16
-if [ $NODE_VERSION -lt 16 ]; then
-    err_log "Node version is less than 16, installing node 16"
+if [ $? -eq 1 ]; then
     curl -fsSL https://deb.nodesource.com/setup_16.x | bash -
     apt install -y nodejs npm
 fi
+
 
 # install yarn
 OUT=$(yarn --version)
