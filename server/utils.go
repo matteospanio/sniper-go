@@ -12,7 +12,7 @@ import (
 	"strings"
 )
 
-func isIP(s string) bool {
+func IsIP(s string) bool {
 	// Regex for IPv4
 	ip4Regex := regexp.MustCompile(`^(\d{1,3}\.){3}\d{1,3}$`)
 	// Regex for IPv6
@@ -25,7 +25,7 @@ func isIP(s string) bool {
 	return false
 }
 
-func isEmpty(s string) bool {
+func IsEmpty(s string) bool {
 	trimmed := strings.TrimSpace(s)
 	return len(trimmed) == 0
 }

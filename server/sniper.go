@@ -62,8 +62,8 @@ type Target struct {
 }
 
 const (
-	sniperReportPath = "/usr/share/sniper/loot/workspace"
-	sniperOutPath    = "/usr/share/sniper/loot/output"
+	SniperReportPath = "/usr/share/sniper/loot/workspace"
+	SniperOutPath    = "/usr/share/sniper/loot/output"
 )
 
 /*
@@ -186,7 +186,7 @@ func getTarget(host string) Target {
 	// find the host name
 	targets, _ := readSniperFile(host, "domains/targets-all-sorted.txt")
 	for _, target := range strings.Split(targets, "\n") {
-		if !isEmpty(target) {
+		if !IsEmpty(target) {
 			result.Name = append(result.Name, target)
 		}
 	}
@@ -194,7 +194,7 @@ func getTarget(host string) Target {
 	// find the host IP
 	ips, _ := readSniperFile(host, "ips/ips-all-sorted.txt")
 	for _, ip := range strings.Split(ips, "\n") {
-		if !isEmpty(ip) {
+		if !IsEmpty(ip) {
 			result.IP = append(result.IP, ip)
 		}
 	}
@@ -235,7 +235,7 @@ func getScreenshots(host string) []string {
 	files, err := os.ReadDir(
 		fmt.Sprintf(
 			"%s/%s/screenshots",
-			sniperReportPath,
+			SniperReportPath,
 			host,
 		))
 	if err != nil {
@@ -284,7 +284,7 @@ func readSniperFile(host string, filePath string) (string, error) {
 	content, err := os.ReadFile(
 		fmt.Sprintf(
 			"%s/%s/%s",
-			sniperReportPath,
+			SniperReportPath,
 			host,
 			filePath,
 		))
@@ -300,7 +300,7 @@ func getResults(query string) ([]map[string]interface{}, error) {
 
 	query = strings.Trim(query, " \t\n")
 
-	fileList, err := os.ReadDir(sniperReportPath)
+	fileList, err := os.ReadDir(SniperReportPath)
 	if err != nil {
 		return results, err
 	}
@@ -365,7 +365,7 @@ func getTasks(query string) ([]map[string]interface{}, error) {
 
 	query = strings.Trim(query, " \t\n")
 
-	fileList, err := os.ReadDir(sniperReportPath)
+	fileList, err := os.ReadDir(SniperReportPath)
 	if err != nil {
 		return results, err
 	}

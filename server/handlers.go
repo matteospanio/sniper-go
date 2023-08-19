@@ -26,7 +26,7 @@ type Status struct {
 
 func printer(status *Status, start string, target string) {
 	for status.Running {
-		read := exec.Command("bash", "-c", "tail -n 200 "+sniperOutPath+"/sniper-"+target+"-"+start+".txt")
+		read := exec.Command("bash", "-c", "tail -n 200 "+SniperOutPath+"/sniper-"+target+"-"+start+".txt")
 		out, err := read.Output()
 		if err != nil {
 			fmt.Println(err)
@@ -97,7 +97,7 @@ func handleScreenshots(c *gin.Context) {
 	host := c.Param("host")
 	filename := c.Param("filename")
 
-	c.File(filepath.Join(sniperReportPath, host, "screenshots", filename))
+	c.File(filepath.Join(SniperReportPath, host, "screenshots", filename))
 }
 
 func handleApiResults(c *gin.Context) {
