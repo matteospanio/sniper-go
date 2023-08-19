@@ -30,6 +30,7 @@ help: ## Show this help
 clean: ## Remove build artifacts
 	rm -rf dist
 	rm -rf bin
+    rm -rf site
 
 build: ## Build the binary file
 	@echo "Building the backend..."
