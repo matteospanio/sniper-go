@@ -60,6 +60,16 @@ else
     npm install -g yarn
 fi
 
+# install sniper
+OUT=$(sniper --help)
+if [ $? -eq 0 ]; then
+    ok_log "Sniper is already installed"
+else
+    git clone https://github.com/1N3/Sn1per
+    cd Sn1per
+    bash install.sh
+fi
+
 # install go
 OUT=$(go version)
 if [ $? -eq 0 ]; then
@@ -70,16 +80,6 @@ else
     rm go1.21.0.linux-amd64.tar.gz
     echo "export PATH=$PATH:/usr/local/go/bin" >> ~/.bashrc
     source ~/.bashrc
-fi
-
-# install sniper
-OUT=$(sniper --help)
-if [ $? -eq 0 ]; then
-    ok_log "Sniper is already installed"
-else
-    git clone https://github.com/1N3/Sn1per
-    cd Sn1per
-    bash install.sh
 fi
 
 mkdir -p /usr/share/sniper/loot/workspace
