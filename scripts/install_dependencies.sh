@@ -42,9 +42,15 @@ check_version "node" 16
 # if node version is less than 16, install node 16
 if [ $? -eq 1 ]; then
     curl -fsSL https://deb.nodesource.com/setup_16.x | bash -
-    apt install -y nodejs npm
+    apt install -y nodejs
 fi
 
+# check npm version
+check_version "npm" 6
+# if npm version is less than 6, install npm
+if [ $? -eq 1 ]; then
+    apt install -y npm
+fi
 
 # install yarn
 OUT=$(yarn --version)

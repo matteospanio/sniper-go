@@ -1,5 +1,5 @@
-GO = /usr/local/go/bin/go
-YARN = /usr/local/bin/yarn
+GO = go
+YARN = yarn
 BINARY_NAME = sniper-go
 PROD_PATH = /usr/local/share/$(BINARY_NAME)
 
