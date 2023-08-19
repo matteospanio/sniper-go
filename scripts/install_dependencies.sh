@@ -10,6 +10,12 @@ function check_version {
     # $1: command to check version
     # $2: version to check
     OUT=$($1 --version)
+
+    # if leading v is missing, add it
+    if [[ $OUT =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+        OUT="v$OUT"
+    fi
+
     if [ $? -eq 0 ]; then
         ok_log "$1 is already installed"
         VERSION=$(echo $OUT | sed -E 's/^v([0-9]+)\.([0-9]+)\.([0-9]+)$/\1/')
