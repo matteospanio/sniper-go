@@ -10,6 +10,7 @@ SNIPER_GO_DIR=$(pwd)
 apt update
 
 # install git, node, npm
+curl -fsSL https://deb.nodesource.com/setup_16.x | bash -
 apt install -y nodejs npm git-all make
 
 # install yarn
