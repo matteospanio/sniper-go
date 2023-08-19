@@ -17,7 +17,7 @@ const config = {
     app: appPath + '/app.ts'
   },
   output: {
-    path: path.resolve(__dirname, "./dist/"),
+    path: path.resolve(__dirname, "../dist/"),
     filename: '[name].js',
     chunkFilename: '[id].js',
     clean: true,

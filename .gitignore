@@ -15,5 +15,8 @@ screens
 data
 history
 
+# docs
+venv
+
 # random
 TODO.md
