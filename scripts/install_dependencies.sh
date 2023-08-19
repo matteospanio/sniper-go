@@ -82,4 +82,6 @@ else
     bash install.sh
 fi
 
+mkdir -p /usr/share/sniper/loot/workspace
+
 cd $SNIPER_GO_DIR
