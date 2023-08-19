@@ -1,6 +1,6 @@
-# Welcome to MkDocs
+# sniper-go
 
-For full documentation visit [mkdocs.org](https://www.mkdocs.org).
+sniper-go is a server for the [Sn1per](https://github.com/1N3/Sn1per) project. It is written in Go and is designed to be fast and lightweight.
 
 ## Commands
 

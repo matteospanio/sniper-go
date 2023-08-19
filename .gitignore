@@ -1,5 +1,5 @@
 # go
-/bin
+bin
 
 # yarn
 node_modules
@@ -17,6 +17,7 @@ history
 
 # docs
 venv
+site
 
 # random
 TODO.md

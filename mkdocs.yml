@@ -1,1 +1,95 @@
 site_name: sniper-go
+site_description: A web interface over Sn1per community edition
+site_url: https://matteospanio.github.io/sniper-go/
+copyright: Copyright &copy; 2023 Matteo Spanio
+repo_url: https://github.com/matteospanio/sniper-go
+repo_name: matteospanio/sniper-go
+
+nav:
+  - Home: index.md
+
+markdown_extensions:
+  - abbr
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - toc:
+      permalink: true
+  - tables
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.snippets
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/matteospanio
+
+    - icon: fontawesome/brands/linkedin
+      link: https://www.linkedin.com/in/matteo-spanio/
+
+plugins:
+  - search
+  - tags:
+      enabled: !ENV [CI, false]
+
+theme:
+  icon:
+    edit: material/pencil
+    view: material/eye
+  name: material
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.sections
+    - navigation.expand
+    - navigation.indexes
+    - toc.follow
+    - navigation.top
+    - navigation.path
+
+    - search.suggest
+    - search.highlight
+    - search.share
+
+    - header.autohide
+
+    - content.tooltips
+    - content.tabs.link
+    - content.action.edit
+    - content.code.copy
+    - content.code.annotate
+
+  palette:
+
+    # Palette toggle for automatic mode
+    - media: "(prefers-color-scheme)"
+      toggle:
+        icon: material/brightness-auto
+        name: Switch to light mode
+
+    # Palette toggle for light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+
+
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+
+    # Palette toggle for dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to system preference
