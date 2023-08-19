@@ -49,6 +49,7 @@ check_version "node" 16
 if [ $? -eq 1 ]; then
     curl -fsSL https://deb.nodesource.com/setup_16.x | bash -
     apt install -y nodejs
+    assert_error "Error installing node"
 fi
 
 # check npm version
@@ -56,6 +57,7 @@ check_version "npm" 6
 # if npm version is less than 6, install npm
 if [ $? -eq 1 ]; then
     apt install -y npm
+    assert_error "Error installing npm"
 fi
 
 # install yarn
@@ -64,6 +66,7 @@ if [ $? -eq 0 ]; then
     ok_log "Yarn is already installed"
 else
     npm install -g yarn
+    assert_error "Error installing yarn"
 fi
 
 # install sniper
@@ -74,6 +77,7 @@ else
     git clone https://github.com/1N3/Sn1per
     cd Sn1per
     bash install.sh
+    assert_error "Error installing sniper"
 fi
 
 # install go

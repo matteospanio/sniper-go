@@ -14,12 +14,10 @@ systemctl daemon-reload
 systemctl enable $SERVICE
 ok_log "Sniper-go service installed"
 
-echo "$BOLD[>]$RESET Do you want to start the service now? [y/n]"
+echo -e "$BOLD[>]$RESET Do you want to start the service now? [y/n]"
 read answer
 if [ "$answer" == "y" || "$answer" == "Y" || "$answer" == "yes" || "$answer" == "Yes" ]; then
     systemctl start $SERVICE
-    if [ $? -ne 0 ]; then
-        err_log "Error starting sniper-go service"
-    else
+    assert_error "Error starting sniper-go service"
     ok_log "Sniper-go service started"
 fi
