@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -24,9 +25,12 @@ type Status struct {
 	Running bool
 }
 
+var mutex sync.Mutex
+
 func printer(status *Status, start string, target string) {
 	for status.Running {
 		read := exec.Command("bash", "-c", "tail -n 200 "+SniperOutPath+"/sniper-"+target+"-"+start+".txt")
+
 		out, err := read.Output()
 		if err != nil {
 			fmt.Println(err)
@@ -35,7 +39,9 @@ func printer(status *Status, start string, target string) {
 		}
 
 		for conn := range connections {
+			mutex.Lock()
 			conn.WriteMessage(websocket.TextMessage, out)
+			mutex.Unlock()
 		}
 
 		time.Sleep(1 * time.Second)
@@ -84,9 +90,11 @@ func handleWebSocket(c *gin.Context) {
 		status.Running = false
 
 		for conn := range connections {
+			mutex.Lock()
 			if err := conn.WriteMessage(websocket.TextMessage, []byte("[DONE]")); err != nil {
 				fmt.Println("Failed to send message to client:", err)
 			}
+			mutex.Unlock()
 		}
 
 		fmt.Println("[DONE]")
