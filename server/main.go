@@ -8,6 +8,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"html/template"
 	"net/http"
@@ -75,21 +76,39 @@ var (
 )
 
 const (
-	distPath      = "./dist"
-	screensPath   = "./screens"
-	templatesPath = "./templates"
+	distPath          = "./dist"
+	templatesPath     = "./templates"
+	prodTemplatesPath = "/usr/local/share/sniper-go/templates"
+	prodDistPath      = "/usr/local/share/sniper-go/dist"
 )
 
 // GIN server
 func main() {
-	PORT, exists := os.LookupEnv("PORT")
-	if !exists {
-		PORT = "8080"
+
+	PORT := flag.String("port", "8080", "Port where sniper-go be served")
+	MODE := flag.String("mode", "debug", "Mode where sniper-go be served, can be debug or release")
+	flag.Parse()
+
+	if *MODE == "debug" {
+		gin.SetMode(gin.DebugMode)
+	} else {
+		gin.SetMode(gin.ReleaseMode)
 	}
 
 	router := gin.Default()
-	router.HTMLRender = loadTemplates(templatesPath)
-	router.Static("/assets", distPath)
+
+	switch *MODE {
+	case "release":
+		router.HTMLRender = loadTemplates(prodTemplatesPath)
+		router.Static("/assets", prodDistPath)
+	case "debug":
+		router.HTMLRender = loadTemplates(templatesPath)
+		router.Static("/assets", distPath)
+	default:
+		fmt.Println("Invalid mode: " + *MODE)
+		flag.PrintDefaults()
+		os.Exit(1)
+	}
 
 	router.NoRoute(func(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Not found"})
@@ -123,7 +142,7 @@ func main() {
 	router.GET("/tasks", handleTasks)
 	router.GET("/tasks/:id", handleSingleTask)
 
-	err := router.Run(fmt.Sprintf("0.0.0.0:%s", PORT))
+	err := router.Run(fmt.Sprintf("0.0.0.0:%s", *PORT))
 	if err != nil {
 		fmt.Println(err.Error())
 		return

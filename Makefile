@@ -1,33 +1,46 @@
 GO = go
 YARN = yarn
 BINARY_NAME = sniper-go
+PROD_PATH = /usr/local/share/$(BINARY_NAME)
 
 .PHONY: help build setup dependencies install service clean
 .DEFAULT_GOAL := help
 
-clean: ## Remove build files
-	rm -rf dist
-    rm -rf bin
+define PRINT_HELP_PYSCRIPT
+import re, sys
+
+BOLD = '\033[1m'
+BLUE = '\033[94m'
+END = '\033[0m'
+
+print("Usage: make <target>\n")
+print(BOLD + "%-20s%s" % ("target", "description") + END)
+for line in sys.stdin:
+	match = re.match(r'^([a-zA-Z_-]+):.*?## (.*)$$', line)
+	if match:
+		target, help = match.groups()
+		print( BLUE + "%-20s" % (target) + END + "%s" % (help))
+endef
+export PRINT_HELP_PYSCRIPT
+
 
 help: ## Show this help
-	@echo "Usage: make <target>"
-	@echo "Targets:"
-	@echo "  install: Install the project (requires sudo)"
-	@echo "  dependencies: Install the dependencies"
-	@echo "  setup: Setup the project"
-	@echo "  build: Build the binary file"
-	@echo "  service: Create the systemd service"
+	python3 -c "$$PRINT_HELP_PYSCRIPT" < $(MAKEFILE_LIST)
+
+clean: ## Remove build artifacts
+	rm -rf dist
+	rm -rf bin
 
 build: ## Build the binary file
 	@echo "Building the backend..."
-	cd ./src && $(GO) build -o ../bin/$(BINARY_NAME) .
+	cd ./server && $(GO) build -o ../bin/$(BINARY_NAME) .
 
 setup: ## Setup the project
 	@echo "Setting up the project..."
-	cd ./src && $(GO) get .
-	$(YARN) install
+	cd ./server && $(GO) get .
 	@echo "Building the frontend..."
-	$(YARN) build:dev
+	$(YARN) cd ./client && install
+	$(YARN) cd ./client && build:dev
 
 dependencies: ## Install the dependencies
 	@echo "Installing the dependencies..."
@@ -35,12 +48,12 @@ dependencies: ## Install the dependencies
 
 install: dependencies setup build ## Install the project
 	@echo "Installing the project..."
-	sudo mkdir -p /usr/local/share/$(BINARY_NAME)
-	sudo cp -r README.md /usr/local/share/$(BINARY_NAME)
-	sudo cp -r ./dist /usr/local/share/$(BINARY_NAME)
-	sudo cp -r ./scripts /usr/local/share/$(BINARY_NAME)
-	sudo cp -r ./templates /usr/local/share/$(BINARY_NAME)
-	sudo cp ./bin/$(BINARY_NAME) /usr/local/bin/$(BINARY_NAME)
+	mkdir -p $(PROD_PATH)
+	cp -r README.md $(PROD_PATH)
+	cp -r ./dist $(PROD_PATH)
+	cp -r ./scripts $(PROD_PATH)
+	cp -r ./templates $(PROD_PATH)
+	cp ./bin/$(BINARY_NAME) /usr/local/bin/$(BINARY_NAME)
 	@echo "Done!"
 
 service: install ## Create the systemd service

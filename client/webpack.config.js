@@ -4,7 +4,7 @@ const path = require("path");
 const { WebpackManifestPlugin } = require('webpack-manifest-plugin');
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
-const rootAssetPath = './assets'
+const appPath = './src'
 
 const isProduction = process.env.NODE_ENV == "production";
 
@@ -14,11 +14,10 @@ const stylesHandler = isProduction
 
 const config = {
   entry: {
-    app: rootAssetPath + '/app.ts'
+    app: appPath + '/app.ts'
   },
   output: {
     path: path.resolve(__dirname, "./dist/"),
-    //publicPath: 'http://localhost:5000/static',
     filename: '[name].js',
     chunkFilename: '[id].js',
     clean: true,
