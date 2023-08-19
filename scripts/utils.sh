@@ -7,7 +7,7 @@ BOLD='\033[1m'
 
 function check_root() {
     if [[ $EUID -ne 0 ]]; then
-        echo "$BOLDRED[+]$RESET This script must be run as root"
+        echo -e "$BOLDRED[+]$RESET This script must be run as root"
         exit 1
     fi
 }
