@@ -6,20 +6,41 @@
 
 SNIPER_GO_DIR=$(pwd)
 
+cd /tmp
+
 # update repositories 
 apt update
 
+# install curl
+apt install -y curl git-all make
+
 # install git, node, npm
-curl -fsSL https://deb.nodesource.com/setup_16.x | bash -
-apt install -y nodejs npm git-all make
+
+OUT=$(node --version)
+
+# get node version major
+NODE_VERSION=$(echo $OUT | sed -E 's/^v([0-9]+)\.([0-9]+)\.([0-9]+)$/\1/')
+
+# if node version is less than 16, install node 16
+if [ $NODE_VERSION -lt 16 ]; then
+    echo "Node version is less than 16, installing node 16"
+    curl -fsSL https://deb.nodesource.com/setup_16.x | bash -
+    apt install -y nodejs npm
+fi
 
 # install yarn
-if [ ! -f /usr/bin/yarn ]; then
+OUT=$(yarn --version)
+if [ $? -eq 0 ]; then
+    echo "Yarn is already installed"
+else
     npm install -g yarn
 fi
 
 # install go
-if [ ! -f /usr/local/go/bin/go ]; then
+OUT=$(go version)
+if [ $? -eq 0 ]; then
+    echo "Go is already installed"
+else
     wget https://golang.org/dl/go1.21.0.linux-amd64.tar.gz
     tar -C /usr/local -xzf go1.21.0.linux-amd64.tar.gz
     rm go1.21.0.linux-amd64.tar.gz
@@ -32,7 +53,6 @@ OUT=$(sniper --help)
 if [ $? -eq 0 ]; then
     echo "Sniper is already installed"
 else
-    cd /tmp
     git clone https://github.com/1N3/Sn1per
     cd Sn1per
     bash install.sh
