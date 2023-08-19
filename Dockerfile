@@ -16,4 +16,4 @@ VOLUME [ "/usr/share/sniper/loot" ]
 
 EXPOSE 8080
 
-CMD ["./bin/sniper-go"]
+CMD ["./bin/sniper-go", "-port", "8080", "-mode", "debug"]
