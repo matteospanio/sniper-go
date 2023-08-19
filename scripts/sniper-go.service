@@ -7,7 +7,7 @@ Requires=postgresql.service
 
 [Service]
 Type=simple
-ExecStart=/usr/local/bin/sniper-go
+ExecStart=/usr/local/bin/sniper-go --mode release
 Restart=always
 RestartSec=5s
 User=root

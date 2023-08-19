@@ -86,7 +86,7 @@ const (
 func main() {
 
 	PORT := flag.String("port", "8080", "Port where sniper-go be served")
-	MODE := flag.String("mode", "debug", "Mode where sniper-go be served, can be debug or release")
+	MODE := flag.String("mode", "release", "Mode where sniper-go be served, can be debug or release")
 	flag.Parse()
 
 	if *MODE == "debug" {

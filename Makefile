@@ -59,3 +59,7 @@ install: dependencies setup build ## Install the project
 service: install ## Create the systemd service
 	@echo "Creating systemd service..."
 	bash ./scripts/install_service.sh
+
+docs: ## Generate the documentation
+	@echo "Generating the documentation..."
+	python3 -m mkdocs build --clean
