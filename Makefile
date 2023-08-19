@@ -1,5 +1,5 @@
-GO = go
-YARN = yarn
+GO = /usr/local/go/bin/go
+YARN = /usr/local/bin/yarn
 BINARY_NAME = sniper-go
 PROD_PATH = /usr/local/share/$(BINARY_NAME)
 
@@ -39,8 +39,8 @@ setup: ## Setup the project
 	@echo "Setting up the project..."
 	cd ./server && $(GO) get .
 	@echo "Building the frontend..."
-	$(YARN) cd ./client && install
-	$(YARN) cd ./client && build:dev
+	$(YARN) --cwd ./client install
+	$(YARN) --cwd ./client build:dev
 
 dependencies: ## Install the dependencies
 	@echo "Installing the dependencies..."
@@ -49,7 +49,7 @@ dependencies: ## Install the dependencies
 install: dependencies setup build ## Install the project
 	@echo "Installing the project..."
 	mkdir -p $(PROD_PATH)
-	cp -r README.md $(PROD_PATH)
+	cp README.md $(PROD_PATH)
 	cp -r ./dist $(PROD_PATH)
 	cp -r ./scripts $(PROD_PATH)
 	cp -r ./templates $(PROD_PATH)
