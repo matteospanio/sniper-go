@@ -36,7 +36,7 @@ clean: ## Remove build artifacts
 
 build: ## Build the binary file
 	@echo "Building the backend..."
-	cd $(SRC_DIR) && $(GO) build -o ../$(BUILD_DIR)/$(BINARY_NAME) .
+	$(GO) build -o $(BUILD_DIR)/$(BINARY_NAME) ./$(SRC_DIR)
 	$(YARN) --cwd ./client build:dev
 
 setup: ## Setup the project
