@@ -5,7 +5,7 @@
  * author: matteospanio
  */
 
-package main
+package sniper
 
 import (
 	"errors"
@@ -16,6 +16,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/matteospanio/sniper-go/utils"
 )
 
 // ReportSummary The vulnerability report from sn1per
@@ -62,15 +64,15 @@ type Target struct {
 }
 
 const (
-	SniperReportPath = "/usr/share/sniper/loot/workspace"
-	SniperOutPath    = "/usr/share/sniper/loot/output"
+	ReportPath = "/usr/share/sniper/loot/workspace"
+	OutPath    = "/usr/share/sniper/loot/output"
 )
 
 /*
  * Create a report from the scan
  * Return a Report struct
  */
-func createReport(host string) (Report, error) {
+func CreateReport(host string) (Report, error) {
 	var result Report
 
 	date, err := getLastScan(host)
@@ -97,7 +99,7 @@ func createReport(host string) (Report, error) {
 	}
 	result.History = history
 
-	vuln, err := getDetails(host)
+	vuln, err := GetDetails(host)
 	if err != nil {
 		return result, err
 	}
@@ -186,7 +188,7 @@ func getTarget(host string) Target {
 	// find the host name
 	targets, _ := readSniperFile(host, "domains/targets-all-sorted.txt")
 	for _, target := range strings.Split(targets, "\n") {
-		if !IsEmpty(target) {
+		if !utils.IsEmpty(target) {
 			result.Name = append(result.Name, target)
 		}
 	}
@@ -194,7 +196,7 @@ func getTarget(host string) Target {
 	// find the host IP
 	ips, _ := readSniperFile(host, "ips/ips-all-sorted.txt")
 	for _, ip := range strings.Split(ips, "\n") {
-		if !IsEmpty(ip) {
+		if !utils.IsEmpty(ip) {
 			result.IP = append(result.IP, ip)
 		}
 	}
@@ -235,7 +237,7 @@ func getScreenshots(host string) []string {
 	files, err := os.ReadDir(
 		fmt.Sprintf(
 			"%s/%s/screenshots",
-			SniperReportPath,
+			ReportPath,
 			host,
 		))
 	if err != nil {
@@ -249,7 +251,7 @@ func getScreenshots(host string) []string {
 	return result
 }
 
-func getDetails(host string) ([]Vulnerability, error) {
+func GetDetails(host string) ([]Vulnerability, error) {
 	var result []Vulnerability
 
 	content, err := readSniperFile(host, "vulnerabilities/sc0pe-all-vulnerabilities-sorted.txt")
@@ -284,7 +286,7 @@ func readSniperFile(host string, filePath string) (string, error) {
 	content, err := os.ReadFile(
 		fmt.Sprintf(
 			"%s/%s/%s",
-			SniperReportPath,
+			ReportPath,
 			host,
 			filePath,
 		))
@@ -295,12 +297,12 @@ func readSniperFile(host string, filePath string) (string, error) {
 	return string(content), nil
 }
 
-func getResults(query string) ([]map[string]interface{}, error) {
+func GetResults(query string) ([]map[string]interface{}, error) {
 	var results []map[string]interface{}
 
 	query = strings.Trim(query, " \t\n")
 
-	fileList, err := os.ReadDir(SniperReportPath)
+	fileList, err := os.ReadDir(ReportPath)
 	if err != nil {
 		return results, err
 	}
@@ -360,12 +362,12 @@ func isRunning(host string) (bool, error) {
 	return isRunning > 0, nil
 }
 
-func getTasks(query string) ([]map[string]interface{}, error) {
+func GetTasks(query string) ([]map[string]interface{}, error) {
 	var results []map[string]interface{}
 
 	query = strings.Trim(query, " \t\n")
 
-	fileList, err := os.ReadDir(SniperReportPath)
+	fileList, err := os.ReadDir(ReportPath)
 	if err != nil {
 		return results, err
 	}
@@ -407,7 +409,7 @@ func getTasks(query string) ([]map[string]interface{}, error) {
 	return results, nil
 }
 
-func getTask(id string) (Task, error) {
+func GetTask(id string) (Task, error) {
 	var result Task
 	result.Target = getTarget(id)
 

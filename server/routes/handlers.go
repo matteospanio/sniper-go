@@ -1,4 +1,4 @@
-package main
+package routes
 
 import (
 	"fmt"
@@ -11,6 +11,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
+	"github.com/matteospanio/sniper-go/sniper"
 )
 
 const (
@@ -27,9 +28,18 @@ type Status struct {
 
 var mutex sync.Mutex
 
+var (
+	Wsupgrader = websocket.Upgrader{
+		ReadBufferSize:  1024,
+		WriteBufferSize: 1024,
+		CheckOrigin:     func(r *http.Request) bool { return true },
+	}
+	connections = make(map[*websocket.Conn]bool)
+)
+
 func printer(status *Status, start string, target string) {
 	for status.Running {
-		read := exec.Command("bash", "-c", "tail -n 200 "+SniperOutPath+"/sniper-"+target+"-"+start+".txt")
+		read := exec.Command("bash", "-c", "tail -n 200 "+sniper.OutPath+"/sniper-"+target+"-"+start+".txt")
 
 		out, err := read.Output()
 		if err != nil {
@@ -48,8 +58,8 @@ func printer(status *Status, start string, target string) {
 	}
 }
 
-func handleWebSocket(c *gin.Context) {
-	conn, err := wsupgrader.Upgrade(c.Writer, c.Request, nil)
+func HandleWebSocket(c *gin.Context) {
+	conn, err := Wsupgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
 		fmt.Println("Failed to set websocket upgrade: ", err)
 		return
@@ -101,16 +111,16 @@ func handleWebSocket(c *gin.Context) {
 	}
 }
 
-func handleScreenshots(c *gin.Context) {
+func HandleScreenshots(c *gin.Context) {
 	host := c.Param("host")
 	filename := c.Param("filename")
 
-	c.File(filepath.Join(SniperReportPath, host, "screenshots", filename))
+	c.File(filepath.Join(sniper.ReportPath, host, "screenshots", filename))
 }
 
-func handleApiResults(c *gin.Context) {
+func HandleApiResults(c *gin.Context) {
 	query := strings.Trim(c.Query("q"), " \t\n")
-	results, err := getResults(query)
+	results, err := sniper.GetResults(query)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -120,9 +130,9 @@ func handleApiResults(c *gin.Context) {
 
 }
 
-func handleResults(c *gin.Context) {
+func HandleResults(c *gin.Context) {
 	query := c.Query("query")
-	results, err := getResults(query)
+	results, err := sniper.GetResults(query)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 	}
@@ -133,9 +143,9 @@ func handleResults(c *gin.Context) {
 	})
 }
 
-func handleApiSingleResult(c *gin.Context) {
+func HandleApiSingleResult(c *gin.Context) {
 	host := c.Param("hostName")
-	report, err := createReport(host)
+	report, err := sniper.CreateReport(host)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
@@ -143,10 +153,10 @@ func handleApiSingleResult(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": report})
 }
 
-func handleSingleResult(c *gin.Context) {
+func HandleSingleResult(c *gin.Context) {
 	host := c.Param("hostName")
 
-	report, err := createReport(host)
+	report, err := sniper.CreateReport(host)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
@@ -159,9 +169,9 @@ func handleSingleResult(c *gin.Context) {
 	})
 }
 
-func handleApiTasks(c *gin.Context) {
+func HandleApiTasks(c *gin.Context) {
 	query := strings.Trim(c.Query("q"), " \t\n")
-	tasks, err := getTasks(query)
+	tasks, err := sniper.GetTasks(query)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -170,9 +180,9 @@ func handleApiTasks(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"tasks": tasks})
 }
 
-func handleTasks(c *gin.Context) {
+func HandleTasks(c *gin.Context) {
 	query := c.Query("query")
-	tasks, err := getTasks(query)
+	tasks, err := sniper.GetTasks(query)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 	}
@@ -183,9 +193,9 @@ func handleTasks(c *gin.Context) {
 	})
 }
 
-func handleApiSingleTask(c *gin.Context) {
+func HandleApiSingleTask(c *gin.Context) {
 	host := c.Param("hostName")
-	task, err := getTask(host)
+	task, err := sniper.GetTask(host)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
@@ -193,11 +203,11 @@ func handleApiSingleTask(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": task})
 }
 
-func handleSingleTask(c *gin.Context) {
+func HandleSingleTask(c *gin.Context) {
 	// TODO
 	host := c.Param("id")
 
-	report, err := getTask(host)
+	report, err := sniper.GetTask(host)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
@@ -205,5 +215,11 @@ func handleSingleTask(c *gin.Context) {
 
 	c.HTML(http.StatusOK, reportTemplate, gin.H{
 		"report": report,
+	})
+}
+
+func Index(c *gin.Context) {
+	c.HTML(http.StatusOK, indexTemplate, gin.H{
+		"title": "Sn1per web interface",
 	})
 }

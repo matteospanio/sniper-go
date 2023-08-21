@@ -5,7 +5,7 @@
  * author: matteospanio
  */
 
-package main
+package utils
 
 import (
 	"regexp"

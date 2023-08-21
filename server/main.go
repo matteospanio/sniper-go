@@ -18,7 +18,7 @@ import (
 
 	"github.com/gin-contrib/multitemplate"
 	"github.com/gin-gonic/gin"
-	"github.com/gorilla/websocket"
+	"github.com/matteospanio/sniper-go/routes"
 )
 
 func loadTemplates(templatesDir string) multitemplate.Renderer {
@@ -66,15 +66,6 @@ func loadTemplates(templatesDir string) multitemplate.Renderer {
 	return r
 }
 
-var (
-	wsupgrader = websocket.Upgrader{
-		ReadBufferSize:  1024,
-		WriteBufferSize: 1024,
-		CheckOrigin:     func(r *http.Request) bool { return true },
-	}
-	connections = make(map[*websocket.Conn]bool)
-)
-
 const (
 	distPath          = "./dist"
 	templatesPath     = "./templates"
@@ -120,30 +111,28 @@ func main() {
 		c.JSON(http.StatusMethodNotAllowed, gin.H{"error": "Method not allowed"})
 	})
 
-	router.GET("/", func(c *gin.Context) {
-		c.HTML(http.StatusOK, indexTemplate, gin.H{
-			"title": "Sn1per web interface",
-		})
-	})
+	router.GET("/", routes.Index)
 
 	router.GET("/ws", func(c *gin.Context) {
-		handleWebSocket(c)
+		routes.HandleWebSocket(c)
 	})
 
-	router.GET("/screens/:host/:filename", handleScreenshots)
+	router.GET("/screens/:host/:filename", routes.HandleScreenshots)
 
 	api := router.Group("/api")
 	{
-		api.GET("/results", handleApiResults)
-		api.GET("/results/:hostName", handleApiSingleResult)
-		api.GET("/tasks", handleApiTasks)
-		api.GET("/tasks/:hostName", handleApiSingleTask)
+		api.GET("/results", routes.HandleApiResults)
+		api.GET("/results/:hostName", routes.HandleApiSingleResult)
+		// api.DELETE("/results/:hostName", handleApiDeleteResult) TODO
+		api.GET("/tasks", routes.HandleApiTasks)
+		api.GET("/tasks/:hostName", routes.HandleApiSingleTask)
+		// api.DELETE("/tasks/:hostName", handleApiDeleteTask) TODO
 	}
 
-	router.GET("/results", handleResults)
-	router.GET("/results/:hostName", handleSingleResult)
-	router.GET("/tasks", handleTasks)
-	router.GET("/tasks/:id", handleSingleTask)
+	router.GET("/results", routes.HandleResults)
+	router.GET("/results/:hostName", routes.HandleSingleResult)
+	router.GET("/tasks", routes.HandleTasks)
+	router.GET("/tasks/:id", routes.HandleSingleTask)
 
 	err := router.Run(fmt.Sprintf("0.0.0.0:%s", *PORT))
 	if err != nil {
