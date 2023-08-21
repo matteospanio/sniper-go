@@ -1,9 +1,11 @@
-GO = go
-YARN = yarn
-BINARY_NAME = sniper-go
-PROD_PATH = /usr/local/share/$(BINARY_NAME)
+GO := go
+YARN := yarn
+BINARY_NAME := sniper-go
+SRC_DIR := server
+BUILD_DIR := bin
+PROD_PATH := /usr/local/share/$(BINARY_NAME)
 
-.PHONY: help build setup dependencies install service clean
+.PHONY: help build setup dependencies install service clean docs
 .DEFAULT_GOAL := help
 
 define PRINT_HELP_PYSCRIPT
@@ -25,23 +27,23 @@ export PRINT_HELP_PYSCRIPT
 
 
 help: ## Show this help
-	python3 -c "$$PRINT_HELP_PYSCRIPT" < $(MAKEFILE_LIST)
+	@python3 -c "$$PRINT_HELP_PYSCRIPT" < $(MAKEFILE_LIST)
 
 clean: ## Remove build artifacts
 	rm -rf dist
-	rm -rf bin
-    rm -rf site
+	rm -rf $(BUILD_DIR)
+	rm -rf site
 
 build: ## Build the binary file
 	@echo "Building the backend..."
-	cd ./server && $(GO) build -o ../bin/$(BINARY_NAME) .
+	cd $(SRC_DIR) && $(GO) build -o ../$(BUILD_DIR)/$(BINARY_NAME) .
+	$(YARN) --cwd ./client build:dev
 
 setup: ## Setup the project
 	@echo "Setting up the project..."
-	cd ./server && $(GO) get .
+	cd $(SRC_DIR) && $(GO) get .
 	@echo "Building the frontend..."
 	$(YARN) --cwd ./client install
-	$(YARN) --cwd ./client build:dev
 
 dependencies: ## Install the dependencies
 	@echo "Installing the dependencies..."
@@ -54,7 +56,7 @@ install: dependencies setup build ## Install the project
 	cp -r ./dist $(PROD_PATH)
 	cp -r ./scripts $(PROD_PATH)
 	cp -r ./templates $(PROD_PATH)
-	cp ./bin/$(BINARY_NAME) /usr/local/bin/$(BINARY_NAME)
+	cp ./$(BUILD_DIR)/$(BINARY_NAME) /usr/local/bin/$(BINARY_NAME)
 	@echo "Done!"
 
 service: install ## Create the systemd service
