@@ -1,17 +1,21 @@
 # sniper-go
 
+The security scanner server for the [Sn1per](https://github.com/1N3/Sn1per) project.
+
+---
+
 sniper-go is a server for the [Sn1per](https://github.com/1N3/Sn1per) project. It is written in Go and is designed to be fast and lightweight.
 
-## Commands
+## Features
 
-* `mkdocs new [dir-name]` - Create a new project.
-* `mkdocs serve` - Start the live-reloading docs server.
-* `mkdocs build` - Build the documentation site.
-* `mkdocs -h` - Print help message and exit.
+- [X] :fontawesome-brands-bootstrap: __Nice UI__ thanks to [Bootstrap](https://getbootstrap.com/)
 
-## Project layout
+- [X] :fontawesome-solid-square-poll-vertical: __Scan Reports__ with download
 
-    mkdocs.yml    # The configuration file.
-    docs/
-        index.md  # The documentation homepage.
-        ...       # Other markdown pages, images and other files.
+!!! todo
+
+    - [ ] :material-chart-line: __Scan history__
+
+    - [ ] :fontawesome-solid-clock: __Scan scheduling__
+
+    - [ ] :fontawesome-solid-user-lock: __User management__

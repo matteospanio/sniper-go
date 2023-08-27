@@ -16,8 +16,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/matteospanio/sniper-go/utils"
 )
 
 // ReportSummary The vulnerability report from sn1per
@@ -42,73 +40,16 @@ type Task struct {
 	Date      time.Time `json:"date"`
 }
 
-type Report struct {
-	Host            Target          `json:"host"`
-	Vulnerabilities []Vulnerability `json:"vulnerabilities"`
-	Summary         ReportSummary   `json:"summary"`
-	Date            time.Time       `json:"date"`
-	Screens         []string        `json:"screens"`
-	History         []Scan          `json:"history"`
-}
-
 type Scan struct {
 	Date   time.Time `json:"date"`
 	Job    string    `json:"scan"`
 	Target string    `json:"target"`
 }
 
-// Target name and IP address
-type Target struct {
-	Name []string `json:"name"`
-	IP   []string `json:"ip"`
-}
-
 const (
 	ReportPath = "/usr/share/sniper/loot/workspace"
 	OutPath    = "/usr/share/sniper/loot/output"
 )
-
-/*
- * Create a report from the scan
- * Return a Report struct
- */
-func CreateReport(host string) (Report, error) {
-	var result Report
-
-	date, err := getLastScan(host)
-	if err != nil {
-		return Report{}, err
-	}
-	result.Date = date
-
-	target := getTarget(host)
-	if err != nil {
-		return Report{}, err
-	}
-	result.Host = target
-
-	summary, err := readSummaryFile(host)
-	if err != nil {
-		return Report{}, err
-	}
-	result.Summary = summary
-
-	history, err := getHistory(host)
-	if err != nil {
-		return Report{}, err
-	}
-	result.History = history
-
-	vuln, err := GetDetails(host)
-	if err != nil {
-		return result, err
-	}
-	result.Vulnerabilities = vuln
-
-	result.Screens = getScreenshots(host)
-
-	return result, nil
-}
 
 func readSummaryFile(host string) (ReportSummary, error) {
 	// Parse file
@@ -176,32 +117,6 @@ func getHistory(host string) ([]Scan, error) {
 	}
 
 	return result, nil
-}
-
-/* Read the vulnerability report from sn1per
- * Return the content of the domains/targets-all-sorted.txt file
- * and the content of the ips/ips-all-sorted.txt file
- */
-func getTarget(host string) Target {
-	result := Target{}
-
-	// find the host name
-	targets, _ := readSniperFile(host, "domains/targets-all-sorted.txt")
-	for _, target := range strings.Split(targets, "\n") {
-		if !utils.IsEmpty(target) {
-			result.Name = append(result.Name, target)
-		}
-	}
-
-	// find the host IP
-	ips, _ := readSniperFile(host, "ips/ips-all-sorted.txt")
-	for _, ip := range strings.Split(ips, "\n") {
-		if !utils.IsEmpty(ip) {
-			result.IP = append(result.IP, ip)
-		}
-	}
-
-	return result
 }
 
 /* Get the start moment of the scan
