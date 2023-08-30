@@ -263,6 +263,15 @@ func GetResults(query string) ([]map[string]interface{}, error) {
 	return results, nil
 }
 
+func DeleteResult(host string) error {
+	return os.RemoveAll(
+		fmt.Sprintf(
+			"%s/%s",
+			ReportPath,
+			host,
+		))
+}
+
 func isRunning(host string) (bool, error) {
 	content, err := readSniperFile(host, "scans/tasks-running.txt")
 	if err != nil {

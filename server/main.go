@@ -123,7 +123,7 @@ func main() {
 	{
 		api.GET("/results", routes.HandleApiResults)
 		api.GET("/results/:hostName", routes.HandleApiSingleResult)
-		// api.DELETE("/results/:hostName", handleApiDeleteResult) TODO
+		api.DELETE("/results/:hostName", routes.HandleApiDeleteResult)
 		api.GET("/tasks", routes.HandleApiTasks)
 		api.GET("/tasks/:hostName", routes.HandleApiSingleTask)
 		// api.DELETE("/tasks/:hostName", handleApiDeleteTask) TODO

@@ -79,6 +79,16 @@ func HandleSingleResult(c *gin.Context) {
 	})
 }
 
+func HandleApiDeleteResult(c *gin.Context) {
+	host := c.Param("hostName")
+	err := sniper.DeleteResult(host)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{})
+}
+
 func HandleApiTasks(c *gin.Context) {
 	query := strings.Trim(c.Query("q"), " \t\n")
 	tasks, err := sniper.GetTasks(query)
